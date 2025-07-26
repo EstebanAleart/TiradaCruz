@@ -316,7 +316,7 @@ Aquí están las cartas de mi tirada:
         <div className="mt-8 text-center">
           <div className="bg-white/70 rounded-xl p-4 inline-block shadow-sm border border-amber-200">
             <p className="text-sm text-amber-800 font-medium">
-              Cartas en el mazo: {mazo.length} | Mezclas: {mezclas}/3 | Cortes: {cortes}/3
+              Cartas en el mazo: {mazo.length} | Mezclas: {mezclas} | Cortes: {cortes}/3
             </p>
           </div>
         </div>
