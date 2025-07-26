@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Shuffle, RotateCcw, Play, ExternalLink } from "lucide-react"
-import { CardImage, CardBackImage } from "../components/card-image"
+import { CardBackImage, CardImage } from "./components/card-image"
 
 // Definir los palos y valores de la baraja española
 const PALOS = ["oros", "copas", "espadas", "bastos"]
