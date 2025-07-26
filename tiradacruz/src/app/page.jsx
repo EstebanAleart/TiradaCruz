@@ -64,6 +64,8 @@ const cortarMazo = (mazo, posicion) => {
 const CartaEnTirada = ({ carta, posicion, mostrar, isReversed }) => {
   return (
     <div className="flex flex-col items-center gap-3">
+      <head><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9884098505893083"
+     crossorigin="anonymous"></script></head>
       <span className="text-sm font-semibold text-gray-700 bg-white/80 px-3 py-1 rounded-full shadow-sm">
         {posicion}
       </span>
