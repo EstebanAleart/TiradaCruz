@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Shuffle, RotateCcw, Play, ExternalLink } from "lucide-react"
-import { CardImage, CardBackImage } from "./components/card-image"
+import { CardBackImage, CardImage } from "./components/card-image"
 
 // Definir los palos y valores de la baraja española
 const PALOS = ["oros", "copas", "espadas", "bastos"]
@@ -64,8 +64,6 @@ const cortarMazo = (mazo, posicion) => {
 const CartaEnTirada = ({ carta, posicion, mostrar, isReversed }) => {
   return (
     <div className="flex flex-col items-center gap-3">
-      <head><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9884098505893083"
-     crossorigin="anonymous"></script></head>
       <span className="text-sm font-semibold text-gray-700 bg-white/80 px-3 py-1 rounded-full shadow-sm">
         {posicion}
       </span>
@@ -90,7 +88,7 @@ export default function TiradaCartasEspanolas() {
   const [mostrarCartas, setMostrarCartas] = useState(false)
   const [mezclas, setMezclas] = useState(0)
   const [cortes, setCortes] = useState(0)
-  const [mensaje, setMensaje] = useState("Mezcla las cartas, luego córtalas 3 veces para poder realizar la tirada")
+  const [mensaje, setMensaje] = useState("Mezcla las cartas, luego córtalas 1 vez para poder realizar la tirada") // Mensaje actualizado
   const [preguntaUsuario, setPreguntaUsuario] = useState("") // Estado para la pregunta
 
   // Inicializar el mazo
@@ -107,18 +105,20 @@ export default function TiradaCartasEspanolas() {
   }
 
   const cortarMazoHandler = () => {
-    if (cortes < 3 && mezclas > 0) {
+    if (cortes < 1 && mezclas > 0) {
+      // Cambiado de 3 a 1
       const posicionCorte = Math.floor(Math.random() * (mazo.length - 10)) + 5
       setMazo((prev) => cortarMazo(prev, posicionCorte))
       setCortes((prev) => prev + 1)
-      setMensaje(`Mazo cortado ${cortes + 1}/3 veces`)
+      setMensaje(`Mazo cortado ${cortes + 1}/1 vez`) // Mensaje actualizado
       setMostrarCartas(false) // Ocultar cartas y resetear tirada al cortar
       setCartasTirada([null, null, null, null, null])
     }
   }
 
   const realizarTirada = () => {
-    if (mezclas >= 1 && cortes === 3) {
+    if (mezclas >= 1 && cortes === 1) {
+      // Cambiado de 3 a 1
       // Tomar las primeras 5 cartas del mazo mezclado y cortado
       const nuevasCartas = mazo.slice(0, 5).map((card) => ({
         ...card,
@@ -128,7 +128,7 @@ export default function TiradaCartasEspanolas() {
       setMostrarCartas(true) // Mostrar las cartas en la app
       setMensaje("¡Tirada realizada! Ahora puedes abrir ChatGPT para la interpretación.")
     } else {
-      setMensaje("Por favor, mezcla las cartas al menos una vez y córtalas 3 veces.")
+      setMensaje("Por favor, mezcla las cartas al menos una vez y córtalas 1 vez.") // Mensaje actualizado
     }
   }
 
@@ -174,12 +174,12 @@ Aquí están las cartas de mi tirada:
     setMostrarCartas(false)
     setMezclas(0)
     setCortes(0)
-    setMensaje("Mezcla las cartas, luego córtalas 3 veces para poder realizar la tirada")
+    setMensaje("Mezcla las cartas, luego córtalas 1 vez para poder realizar la tirada") // Mensaje actualizado
     setPreguntaUsuario("")
   }
 
-  const puedeCortar = mezclas > 0 && cortes < 3
-  const puedeRealizar = mezclas >= 1 && cortes === 3
+  const puedeCortar = mezclas > 0 && cortes < 1 // Cambiado de 3 a 1
+  const puedeRealizar = mezclas >= 1 && cortes === 1 // Cambiado de 3 a 1
   const puedeAbrirChatGPT = mostrarCartas // Solo se activa si ya se realizó la tirada
 
   return (
@@ -227,7 +227,7 @@ Aquí están las cartas de mi tirada:
               className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3"
             >
               <RotateCcw className="w-5 h-5" />
-              Cortar ({cortes}/3)
+              Cortar ({cortes}/1) {/* Mensaje actualizado */}
             </Button>
 
             <Button
@@ -318,7 +318,7 @@ Aquí están las cartas de mi tirada:
         <div className="mt-8 text-center">
           <div className="bg-white/70 rounded-xl p-4 inline-block shadow-sm border border-amber-200">
             <p className="text-sm text-amber-800 font-medium">
-              Cartas en el mazo: {mazo.length} | Mezclas: {mezclas} | Cortes: {cortes}/3
+              Cartas en el mazo: {mazo.length} | Mezclas: {mezclas}/3 | Cortes: {cortes}/1 {/* Mensaje actualizado */}
             </p>
           </div>
         </div>
@@ -326,3 +326,4 @@ Aquí están las cartas de mi tirada:
     </div>
   )
 }
+
