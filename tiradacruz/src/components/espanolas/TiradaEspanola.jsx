@@ -11,10 +11,22 @@ import {
 import Controls from "@/components/espanolas/Controls"
 import EstadoMazo from "@/components/espanolas/EstadoMazo"
 import CruzLayout from "@/components/shared/CruzLayout"
-import InterpretacionPanel from "@/components/shared/InterpretacionPanel"
+import ChatLectura from "@/components/espanolas/ChatLectura"
 import PreguntaInput from "@/components/shared/PreguntaInput"
 
 const MENSAJE_INICIAL = "Mezcla las cartas, luego córtalas 1 vez para poder realizar la tirada"
+
+const POSICIONES = ["Presente", "Futuro", "Resultado", "Pasado", "Consejo"]
+
+// Arma el string de contexto de cartas que va fijo en el system prompt
+const buildCartasContexto = (cartasTirada) =>
+  cartasTirada
+    .map((carta, i) => {
+      const estado = carta.isReversed ? "invertida" : "al derecho"
+      const nombre = `${VALOR_NOMBRES[carta.valor]} de ${PALOS_NOMBRES[carta.palo]}`
+      return `  - ${POSICIONES[i]}: ${nombre} (${estado})`
+    })
+    .join("\n")
 
 export default function TiradaEspanola() {
   const [mazo, setMazo] = useState([])
@@ -24,9 +36,14 @@ export default function TiradaEspanola() {
   const [cortes, setCortes] = useState(0)
   const [mensaje, setMensaje] = useState(MENSAJE_INICIAL)
   const [preguntaUsuario, setPreguntaUsuario] = useState("")
-  const [interpretacion, setInterpretacion] = useState("")
+
+  // Conversación: array de { role: 'user'|'assistant', content: string }
+  const [conversacion, setConversacion] = useState([])
   const [cargandoIA, setCargandoIA] = useState(false)
   const [errorIA, setErrorIA] = useState("")
+
+  // Cartas con nombre resuelto para el chat y la descarga
+  const [cartasConNombre, setCartasConNombre] = useState([])
 
   useEffect(() => {
     setMazo(crearBaraja())
@@ -35,8 +52,9 @@ export default function TiradaEspanola() {
   const resetTirada = () => {
     setMostrarCartas(false)
     setCartasTirada([null, null, null, null, null])
-    setInterpretacion("")
+    setConversacion([])
     setErrorIA("")
+    setCartasConNombre([])
   }
 
   const handleMezclar = () => {
@@ -67,27 +85,43 @@ export default function TiradaEspanola() {
     setCartasTirada(nuevasCartas)
     setMostrarCartas(true)
     setMensaje("¡Tirada realizada! Pedí la interpretación con IA cuando quieras.")
-    setInterpretacion("")
+    setConversacion([])
     setErrorIA("")
+
+    const conNombre = nuevasCartas.map((carta, i) => ({
+      ...carta,
+      nombreCarta: `${VALOR_NOMBRES[carta.valor]} de ${PALOS_NOMBRES[carta.palo]}`,
+      posicion: POSICIONES[i],
+    }))
+    setCartasConNombre(conNombre)
   }
 
-  const handleInterpretar = async () => {
-    if (!mostrarCartas || cartasTirada.some((c) => c === null)) return
+  const enviarMensaje = async (textoUsuario, esInicial = false) => {
+    if (cartasTirada.some((c) => c === null)) return
 
+    const cartasContexto = buildCartasContexto(cartasTirada)
+
+    // Primer mensaje: incluye la pregunta del consultante si la hay
+    let contenidoUsuario = textoUsuario
+    if (esInicial && preguntaUsuario.trim()) {
+      contenidoUsuario = `${textoUsuario}\n\nMi pregunta: ${preguntaUsuario.trim()}`
+    }
+
+    const nuevoMensajeUsuario = { role: "user", content: contenidoUsuario }
+    const historialActualizado = [...conversacion, nuevoMensajeUsuario]
+
+    setConversacion(historialActualizado)
     setCargandoIA(true)
-    setInterpretacion("")
     setErrorIA("")
 
     try {
-      const cartasPayload = cartasTirada.map((carta) => ({
-        nombreCarta: `${VALOR_NOMBRES[carta.valor]} de ${PALOS_NOMBRES[carta.palo]}`,
-        isReversed: carta.isReversed,
-      }))
-
       const res = await fetch("/api/interpretacion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cartas: cartasPayload, pregunta: preguntaUsuario }),
+        body: JSON.stringify({
+          mensajes: historialActualizado,
+          cartasContexto,
+        }),
       })
 
       const data = await res.json()
@@ -95,13 +129,25 @@ export default function TiradaEspanola() {
       if (!res.ok) {
         setErrorIA(data.error || "Error al obtener la interpretación")
       } else {
-        setInterpretacion(data.interpretacion)
+        setConversacion((prev) => [
+          ...prev,
+          { role: "assistant", content: data.respuesta },
+        ])
       }
     } catch {
       setErrorIA("No se pudo conectar con el servicio de IA. Verificá tu conexión.")
     } finally {
       setCargandoIA(false)
     }
+  }
+
+  const handleInterpretar = () => {
+    if (!mostrarCartas || cargandoIA) return
+    enviarMensaje("Realizá la interpretación completa de esta tirada en cruz.", true)
+  }
+
+  const handleSeguimiento = (texto) => {
+    enviarMensaje(texto)
   }
 
   const handleReiniciar = () => {
@@ -112,13 +158,14 @@ export default function TiradaEspanola() {
     setCortes(0)
     setMensaje(MENSAJE_INICIAL)
     setPreguntaUsuario("")
-    setInterpretacion("")
+    setConversacion([])
     setErrorIA("")
+    setCartasConNombre([])
   }
 
   const puedeCortar = mezclas > 0 && cortes < 1
   const puedeRealizar = mezclas >= 1 && cortes === 1
-  const puedeInterpretar = mostrarCartas && !cargandoIA
+  const puedeInterpretar = mostrarCartas && !cargandoIA && conversacion.length === 0
 
   return (
     <div className="text-center mb-8">
@@ -144,10 +191,12 @@ export default function TiradaEspanola() {
 
       <EstadoMazo totalCartas={mazo.length} mezclas={mezclas} cortes={cortes} />
 
-      <InterpretacionPanel
+      <ChatLectura
+        mensajes={conversacion}
         cargando={cargandoIA}
         error={errorIA}
-        interpretacion={interpretacion}
+        cartasTirada={cartasConNombre}
+        onEnviar={handleSeguimiento}
       />
     </div>
   )
