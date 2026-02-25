@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button"
-import { Shuffle, RotateCcw, Play, Sparkles } from "lucide-react"
+import { Shuffle, RotateCcw, Play, Sparkles, RefreshCw } from "lucide-react"
 
 export default function Controls({
   onMezclar,
   onCortar,
   onTirar,
   onInterpretar,
+  onContinuar,
   onReiniciar,
   mezclas,
   cortes,
@@ -13,6 +14,7 @@ export default function Controls({
   puedeRealizar,
   puedeInterpretar,
   cargandoIA,
+  hayConversacion,
 }) {
   return (
     <div className="flex justify-center gap-4 mb-8 flex-wrap">
@@ -54,13 +56,24 @@ export default function Controls({
         {cargandoIA ? "Interpretando..." : "Interpretar con IA"}
       </Button>
 
+      {hayConversacion && (
+        <Button
+          onClick={onContinuar}
+          disabled={cargandoIA}
+          className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-6 py-3"
+        >
+          <RefreshCw className="w-5 h-5" />
+          Nueva tirada (continuar sesión)
+        </Button>
+      )}
+
       <Button
         onClick={onReiniciar}
         variant="outline"
         className="flex items-center gap-2 bg-white/80 hover:bg-white border-amber-300 text-amber-800 px-6 py-3"
       >
         <RotateCcw className="w-5 h-5" />
-        Reiniciar
+        Reiniciar todo
       </Button>
     </div>
   )

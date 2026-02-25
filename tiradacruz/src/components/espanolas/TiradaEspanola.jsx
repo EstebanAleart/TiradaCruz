@@ -15,10 +15,8 @@ import ChatLectura from "@/components/espanolas/ChatLectura"
 import PreguntaInput from "@/components/shared/PreguntaInput"
 
 const MENSAJE_INICIAL = "Mezcla las cartas, luego córtalas 1 vez para poder realizar la tirada"
-
 const POSICIONES = ["Presente", "Futuro", "Resultado", "Pasado", "Consejo"]
 
-// Arma el string de contexto de cartas que va fijo en el system prompt
 const buildCartasContexto = (cartasTirada) =>
   cartasTirada
     .map((carta, i) => {
@@ -36,32 +34,31 @@ export default function TiradaEspanola() {
   const [cortes, setCortes] = useState(0)
   const [mensaje, setMensaje] = useState(MENSAJE_INICIAL)
   const [preguntaUsuario, setPreguntaUsuario] = useState("")
-
-  // Conversación: array de { role: 'user'|'assistant', content: string }
   const [conversacion, setConversacion] = useState([])
   const [cargandoIA, setCargandoIA] = useState(false)
   const [errorIA, setErrorIA] = useState("")
-
-  // Cartas con nombre resuelto para el chat y la descarga
   const [cartasConNombre, setCartasConNombre] = useState([])
+  const [modoContin, setModoContin] = useState(false)
+  const [tiradaYaInterpretada, setTiradaYaInterpretada] = useState(false)
 
   useEffect(() => {
     setMazo(crearBaraja())
   }, [])
 
-  const resetTirada = () => {
+  // Solo resetea el estado visual de la tirada — NO toca la conversación ni modoContin
+  const resetVisual = () => {
     setMostrarCartas(false)
     setCartasTirada([null, null, null, null, null])
-    setConversacion([])
     setErrorIA("")
     setCartasConNombre([])
+    setTiradaYaInterpretada(false)
   }
 
   const handleMezclar = () => {
     setMazo((prev) => mezclarArray(prev))
     setMezclas((prev) => prev + 1)
-    setMensaje(`Mazo mezclado ${mezclas + 1} veces`)
-    resetTirada()
+    setMensaje(modoContin ? "Mezclando nueva tirada..." : `Mazo mezclado ${mezclas + 1} veces`)
+    resetVisual()
   }
 
   const handleCortar = () => {
@@ -69,8 +66,8 @@ export default function TiradaEspanola() {
     const posicion = Math.floor(Math.random() * (mazo.length - 10)) + 5
     setMazo((prev) => cortarMazo(prev, posicion))
     setCortes((prev) => prev + 1)
-    setMensaje(`Mazo cortado ${cortes + 1}/1 vez`)
-    resetTirada()
+    setMensaje(modoContin ? "Mazo cortado. Realizá la tirada." : `Mazo cortado ${cortes + 1}/1 vez`)
+    resetVisual()
   }
 
   const handleTirar = () => {
@@ -84,30 +81,39 @@ export default function TiradaEspanola() {
     }))
     setCartasTirada(nuevasCartas)
     setMostrarCartas(true)
-    setMensaje("¡Tirada realizada! Pedí la interpretación con IA cuando quieras.")
-    setConversacion([])
+    setTiradaYaInterpretada(false)
+    setMensaje(
+      modoContin
+        ? "Nueva tirada lista. Escribí tu pregunta en el chat o interpretá directamente."
+        : "¡Tirada realizada! Pedí la interpretación con IA cuando quieras."
+    )
     setErrorIA("")
-
-    const conNombre = nuevasCartas.map((carta, i) => ({
-      ...carta,
-      nombreCarta: `${VALOR_NOMBRES[carta.valor]} de ${PALOS_NOMBRES[carta.palo]}`,
-      posicion: POSICIONES[i],
-    }))
-    setCartasConNombre(conNombre)
+    setCartasConNombre(
+      nuevasCartas.map((carta, i) => ({
+        ...carta,
+        nombreCarta: `${VALOR_NOMBRES[carta.valor]} de ${PALOS_NOMBRES[carta.palo]}`,
+        posicion: POSICIONES[i],
+      }))
+    )
   }
 
-  const enviarMensaje = async (textoUsuario, esInicial = false) => {
+  const enviarMensaje = async (textoUsuario, esInicial = false, preguntaOverride = null, displayTexto = undefined) => {
     if (cartasTirada.some((c) => c === null)) return
 
     const cartasContexto = buildCartasContexto(cartasTirada)
+    const pregunta = preguntaOverride !== null ? preguntaOverride : preguntaUsuario
 
-    // Primer mensaje: incluye la pregunta del consultante si la hay
     let contenidoUsuario = textoUsuario
-    if (esInicial && preguntaUsuario.trim()) {
-      contenidoUsuario = `${textoUsuario}\n\nMi pregunta: ${preguntaUsuario.trim()}`
+    if (esInicial && pregunta.trim()) {
+      contenidoUsuario = `${textoUsuario}\n\nMi pregunta: ${pregunta.trim()}`
     }
 
-    const nuevoMensajeUsuario = { role: "user", content: contenidoUsuario }
+    // displayTexto: lo que se muestra en el chat (null = oculto, undefined = usa content)
+    const nuevoMensajeUsuario = {
+      role: "user",
+      content: contenidoUsuario,
+      ...(displayTexto !== undefined && { displayContent: displayTexto }),
+    }
     const historialActualizado = [...conversacion, nuevoMensajeUsuario]
 
     setConversacion(historialActualizado)
@@ -118,21 +124,14 @@ export default function TiradaEspanola() {
       const res = await fetch("/api/interpretacion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mensajes: historialActualizado,
-          cartasContexto,
-        }),
+        body: JSON.stringify({ mensajes: historialActualizado, cartasContexto }),
       })
-
       const data = await res.json()
-
       if (!res.ok) {
         setErrorIA(data.error || "Error al obtener la interpretación")
       } else {
-        setConversacion((prev) => [
-          ...prev,
-          { role: "assistant", content: data.respuesta },
-        ])
+        setConversacion((prev) => [...prev, { role: "assistant", content: data.respuesta }])
+        setTiradaYaInterpretada(true)
       }
     } catch {
       setErrorIA("No se pudo conectar con el servicio de IA. Verificá tu conexión.")
@@ -141,13 +140,28 @@ export default function TiradaEspanola() {
     }
   }
 
-  const handleInterpretar = () => {
-    if (!mostrarCartas || cargandoIA) return
-    enviarMensaje("Realizá la interpretación completa de esta tirada en cruz.", true)
+  const handleInterpretar = (preguntaOverride = null) => {
+    if (!mostrarCartas || cargandoIA || tiradaYaInterpretada) return
+    const prompt = modoContin
+      ? "Acabo de hacer una nueva tirada. Interpretá ÚNICAMENTE las cartas que están en el contexto de esta sesión. No uses cartas de tiradas anteriores ni inventes ninguna."
+      : "Realizá la interpretación completa de esta tirada en cruz."
+    // displayTexto: muestra la pregunta del usuario en el chat (o null si no hay, para ocultar el prompt interno)
+    const preguntaDisplay = (modoContin ? preguntaOverride : preguntaUsuario)?.trim() || null
+    enviarMensaje(prompt, !modoContin, preguntaOverride, preguntaDisplay)
   }
 
-  const handleSeguimiento = (texto) => {
-    enviarMensaje(texto)
+  const handleContinuar = () => {
+    setMazo(crearBaraja())
+    setCartasTirada([null, null, null, null, null])
+    setMostrarCartas(false)
+    setMezclas(0)
+    setCortes(0)
+    setPreguntaUsuario("")
+    setErrorIA("")
+    setCartasConNombre([])
+    setTiradaYaInterpretada(false)
+    setModoContin(true)
+    setMensaje("Nueva tirada — mezcla y cortá para continuar la sesión")
   }
 
   const handleReiniciar = () => {
@@ -161,23 +175,29 @@ export default function TiradaEspanola() {
     setConversacion([])
     setErrorIA("")
     setCartasConNombre([])
+    setModoContin(false)
+    setTiradaYaInterpretada(false)
   }
 
   const puedeCortar = mezclas > 0 && cortes < 1
   const puedeRealizar = mezclas >= 1 && cortes === 1
-  const puedeInterpretar = mostrarCartas && !cargandoIA && conversacion.length === 0
+  const puedeInterpretar = mostrarCartas && !cargandoIA && !tiradaYaInterpretada
+  const esperandoPreguntaNuevaTirada = modoContin && mostrarCartas && !tiradaYaInterpretada
+  const sesionActiva = conversacion.length > 0 || cargandoIA
 
   return (
-    <div className="text-center mb-8">
-      <p className="text-amber-700 mb-6 text-lg font-medium">{mensaje}</p>
-
-      <PreguntaInput value={preguntaUsuario} onChange={setPreguntaUsuario} />
+    <div className="mb-8">
+      {/* Mensaje de estado — se oculta una vez que la sesión está activa */}
+      {!sesionActiva && (
+        <p className="text-amber-700 mb-6 text-lg font-medium text-center">{mensaje}</p>
+      )}
 
       <Controls
         onMezclar={handleMezclar}
         onCortar={handleCortar}
         onTirar={handleTirar}
-        onInterpretar={handleInterpretar}
+        onInterpretar={() => handleInterpretar()}
+        onContinuar={handleContinuar}
         onReiniciar={handleReiniciar}
         mezclas={mezclas}
         cortes={cortes}
@@ -185,19 +205,58 @@ export default function TiradaEspanola() {
         puedeRealizar={puedeRealizar}
         puedeInterpretar={puedeInterpretar}
         cargandoIA={cargandoIA}
+        hayConversacion={conversacion.length > 0}
       />
 
-      <CruzLayout cartasTirada={cartasTirada} mostrar={mostrarCartas} />
+      {mostrarCartas ? (
+        // Grid 2 columnas: siempre activo cuando las cartas están reveladas
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start mt-6">
+          {/* Columna izquierda: pregunta + cartas */}
+          <div className="min-w-0">
+            {!modoContin && !tiradaYaInterpretada && (
+              <PreguntaInput value={preguntaUsuario} onChange={setPreguntaUsuario} />
+            )}
+            <CruzLayout cartasTirada={cartasTirada} mostrar={true} />
+            <EstadoMazo totalCartas={mazo.length} mezclas={mezclas} cortes={cortes} />
+          </div>
 
-      <EstadoMazo totalCartas={mazo.length} mezclas={mezclas} cortes={cortes} />
-
-      <ChatLectura
-        mensajes={conversacion}
-        cargando={cargandoIA}
-        error={errorIA}
-        cartasTirada={cartasConNombre}
-        onEnviar={handleSeguimiento}
-      />
+          {/* Columna derecha: chat SIEMPRE visible */}
+          <div className="lg:sticky lg:top-4 min-w-0">
+            <ChatLectura
+              mensajes={conversacion}
+              cargando={cargandoIA}
+              error={errorIA}
+              cartasTirada={cartasConNombre}
+              onEnviar={(texto) => enviarMensaje(texto)}
+              esperandoPreguntaNuevaTirada={esperandoPreguntaNuevaTirada}
+              onInterpretarConPregunta={(pregunta) => handleInterpretar(pregunta)}
+              siempreVisible
+            />
+          </div>
+        </div>
+      ) : (
+        // Layout apilado antes de revelar cartas
+        <>
+          {!modoContin && (
+            <PreguntaInput value={preguntaUsuario} onChange={setPreguntaUsuario} />
+          )}
+          <CruzLayout cartasTirada={cartasTirada} mostrar={false} />
+          <EstadoMazo totalCartas={mazo.length} mezclas={mezclas} cortes={cortes} />
+          {modoContin && conversacion.length > 0 && (
+            <div className="mt-6">
+              <ChatLectura
+                mensajes={conversacion}
+                cargando={cargandoIA}
+                error={errorIA}
+                cartasTirada={cartasConNombre}
+                onEnviar={(texto) => enviarMensaje(texto)}
+                esperandoPreguntaNuevaTirada={false}
+                onInterpretarConPregunta={() => {}}
+              />
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 }

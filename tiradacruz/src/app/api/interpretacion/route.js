@@ -22,13 +22,13 @@ Usás imágenes poéticas y referencias simbólicas. Nunca sos genérica ni obvi
 Podés ser cruda cuando las cartas lo exigen, pero siempre desde la sabiduría, nunca desde la crueldad.
 Cuando respondés preguntas de seguimiento, siempre lo hacés en el contexto de las mismas cartas de la tirada.
 
-Las cartas de esta tirada son:
+ESTAS SON LAS ÚNICAS CARTAS DE LA TIRADA ACTUAL. No menciones, no uses ni inventes ninguna carta que no esté en esta lista. Si el historial de conversación menciona cartas anteriores, ignoralas — solo existís en esta tirada:
 ${cartasContexto}`;
 
     const completion = await groq.chat.completions.create({
       messages: [
         { role: "system", content: systemPrompt },
-        ...mensajes,
+        ...mensajes.map(({ role, content }) => ({ role, content })),
       ],
       model: "llama-3.3-70b-versatile",
       temperature: 0.85,

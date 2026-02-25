@@ -1,10 +1,12 @@
 # TiradaCruz 🃏
 
-Aplicación web de tirada de cartas online con interpretación por IA. Arrancó con baraja española y va a sumar tarot completo.
+Aplicación web de tirada de cartas online con interpretación por IA. Arrancó con baraja española y va a sumar tarot completo, backend, base de datos y monetización.
+
+> **Estándares y convenciones del proyecto:** ver `README de la vida.md`.
 
 ---
 
-## Stack
+## Stack actual
 
 | Capa | Tecnología |
 |------|-----------|
@@ -41,56 +43,143 @@ La app corre en `http://localhost:3000`.
 ## Estructura actual
 
 ```
-src/app/
-├── page.jsx                        # App principal (tirada española en cruz)
-├── layout.js                       # SEO: metadata, JSON-LD, OG tags, lang="es"
-├── globals.css
-├── api/
-│   └── interpretacion/
-│       └── route.js                # POST → Groq API → interpretación en español AR
-└── components/
-    ├── card-image.jsx              # Componentes de imagen (frente + reverso)
-    └── ui/                         # shadcn/ui
+src/
+├── app/
+│   ├── api/interpretacion/route.js    # POST → Groq → chat con historial
+│   ├── layout.js                       # SEO: metadata, JSON-LD, OG, lang="es"
+│   └── page.jsx                        # Server component — ensambla todo
+├── components/
+│   ├── ModoApp.jsx                     # "use client" — selector española / tarot
+│   ├── espanolas/
+│   │   ├── TiradaEspanola.jsx          # "use client" — estado completo de la sesión
+│   │   ├── Controls.jsx                # botones de acción
+│   │   ├── EstadoMazo.jsx              # status bar
+│   │   ├── ChatLectura.jsx             # chat con burbujas + descarga .txt
+│   │   └── CardImage.jsx              # imágenes PNG de las cartas
+│   ├── landing/
+│   │   ├── Hero.jsx                    # server — header SEO
+│   │   ├── SeoContent.jsx              # server — texto keywords
+│   │   ├── FAQ.jsx                     # "use client" — accordion
+│   │   └── Footer.jsx                  # server
+│   ├── shared/
+│   │   ├── CartaEnTirada.jsx           # carta individual (reutilizable española + tarot)
+│   │   ├── CruzLayout.jsx              # grid en cruz 5 cartas
+│   │   ├── InterpretacionPanel.jsx     # loading / error / resultado
+│   │   └── PreguntaInput.jsx           # textarea pregunta
+│   └── ui/button.jsx                   # shadcn
+└── lib/
+    ├── baraja.js                       # constantes + funciones puras baraja española
+    └── utils.js                        # clsx util
 
 public/
-└── cards/                          # 49 PNGs — baraja española (40 cartas + reverso + extras)
-                                    # Formato: 01-bastos.png, 07-oros.png, etc.
+└── cards/                              # 49 PNGs baraja española
 ```
+
+### Mecánica de sesión de chat
+
+No hay websockets ni estado en servidor. El historial de conversación vive en el **estado de React** (`conversacion: [{role, content}]`) y se manda completo en cada request a `/api/interpretacion`. Groq recibe el array y responde en contexto. Simple, stateless, sin costo extra.
 
 ### Baraja española
 
 - **Palos:** oros, copas, espadas, bastos
 - **Valores:** 1–7, 10 (Sota), 11 (Caballo), 12 (Rey) → 40 cartas
-- **Mecánica de la app:**
-  - Mezcla (N veces, sin límite)
-  - Corte (1 vez, posición aleatoria)
-  - Tirada en cruz (5 cartas, con inversión aleatoria 50%)
-  - Interpretación vía Groq con prompt en español argentino
+- **Mecánica:**
+  - Mezcla (N veces) → Corte (1 vez) → Tirada en cruz (5 cartas, inversión 50%)
+  - Chat con IA: primera lectura + follow-ups en la misma sesión
+  - "Continuar sesión": nueva tirada sin perder el historial de chat
 
 ---
 
 ## ⏳ Pendiente
 
-### 1. Monetización
+### 1. Backend (SSR / API separada)
 
-**Corto plazo** (poco tráfico):
-- [ ] Integrar **PropellerAds** o **Adsterra** — banners display + push notifications. Rinden aunque el tráfico sea bajo.
+Cuando la app crezca en usuarios y funcionalidades, el backend de Next.js empieza a quedarse chico. Siguiendo el `README de la vida.md`:
 
-**Medio plazo** (modelo mixto — recomendado):
-- [ ] Tirada gratuita con anuncios
-- [ ] Tirada premium sin anuncios — **1–2 € por sesión** con Stripe o MercadoPago
-  - Mayor conversión que depender solo de CPM con tráfico chico
-  - Stripe para pagos internacionales, MercadoPago para Argentina
-
-**Largo plazo** (tráfico establecido):
-- [ ] Migrar a **Ezoic** o **Media.net** — mejor RPM que AdSense/Adsterra cuando hay visitas constantes
+- [ ] Separar backend en servicio propio (Railway o Render)
+- [ ] Seguir arquitectura hexagonal: dominio sin dependencia de infraestructura
+- [ ] API RESTful con Express o Fastify
+- [ ] Auth con NextAuth v5 + Auth0
 
 ---
 
-### 2. Integración con Tarot (Arcanos)
+### 2. Base de datos — Modelo de suscripción
 
-> **Regla fundamental:** respetar toda la matemática y lógica aplicada a la baraja española.
-> Las cartas españolas quedan como opción. Se suma el tarot como modo nuevo.
+Stack según `README de la vida.md`: **Supabase (PostgreSQL) + Sequelize**
+
+#### Modelo entidad-relación (borrador)
+
+```
+usuarios
+  id          UUID PK
+  email       STRING UNIQUE
+  nombre      STRING
+  plan        ENUM('free', 'premium')
+  created_at  TIMESTAMP
+
+suscripciones
+  id              UUID PK
+  usuario_id      UUID FK → usuarios.id
+  plan            ENUM('premium_mes', 'premium_anual')
+  estado          ENUM('activa', 'cancelada', 'vencida')
+  fecha_inicio    DATE
+  fecha_fin       DATE
+  metodo_pago     ENUM('stripe', 'mercadopago')
+  external_id     STRING   ← ID de la suscripción en Stripe/MP
+
+tiradas
+  id          UUID PK
+  usuario_id  UUID FK → usuarios.id (nullable — usuarios anónimos)
+  modo        ENUM('espanolas', 'tarot_mayores', 'tarot_completo')
+  cartas      JSONB    ← snapshot de las 5 cartas + posición + inversión
+  pregunta    TEXT
+  created_at  TIMESTAMP
+
+mensajes_chat
+  id          UUID PK
+  tirada_id   UUID FK → tiradas.id
+  role        ENUM('user', 'assistant')
+  content     TEXT
+  created_at  TIMESTAMP
+```
+
+#### Reglas de negocio
+
+| Plan | Tiradas/día | Chat follow-ups | Modos disponibles |
+|------|-------------|-----------------|-------------------|
+| Free (con anuncios) | Ilimitadas | 3 por tirada | Española |
+| Premium | Ilimitadas | Ilimitados | Española + Tarot |
+
+#### Tareas pendientes DB
+
+- [ ] Crear proyecto en Supabase
+- [ ] Definir migraciones con Sequelize
+- [ ] Implementar Auth (NextAuth v5 + Auth0)
+- [ ] Middleware de plan en `/api/interpretacion` — verificar límite de follow-ups para free
+- [ ] Guardar tiradas y chat en DB (opcional para free, automático para premium)
+- [ ] Dashboard de usuario: historial de tiradas, estado de suscripción
+
+---
+
+### 3. Monetización
+
+**Corto plazo** (poco tráfico, sin backend):
+- [ ] **PropellerAds** o **Adsterra** — banners + push notifications
+
+**Medio plazo** (con backend + DB):
+- [ ] Modelo freemium con límites por plan (ver tabla arriba)
+- [ ] Integrar **Stripe** — pagos internacionales + suscripciones recurrentes
+- [ ] Integrar **MercadoPago** — mercado argentino
+- [ ] Webhook de pagos → actualizar `suscripciones` en DB
+
+**Largo plazo**:
+- [ ] **Ezoic** o **Media.net** cuando haya tráfico constante (mejor RPM)
+
+---
+
+### 4. Integración con Tarot (Arcanos)
+
+> **Regla fundamental:** respetar toda la matemática aplicada a la baraja española. Las españolas quedan como opción. El tarot es un modo nuevo.
 
 #### API de cartas
 
@@ -98,119 +187,38 @@ public/
 GET https://tarot-api-es.vercel.app/api/v1/cards
 ```
 
-Devuelve 78 cartas con esta estructura:
+Devuelve 78 cartas: `name`, `type`, `meaning_up`, `meaning_rev`, `amor`, `trabajo`, `finanzas`, `salud`, `espiritualidad`, `desc`, `image`.
 
-```json
-{
-  "nhits": 78,
-  "cards": [
-    {
-      "type": "mayor",
-      "name_short": "ar01",
-      "name": "El Mago",
-      "value": "1",
-      "value_int": 1,
-      "image": "url",
-      "meaning_up": "significado al derecho",
-      "meaning_rev": "significado invertida",
-      "amor": "...",
-      "trabajo": "...",
-      "finanzas": "...",
-      "salud": "...",
-      "espiritualidad": "...",
-      "desc": "descripción simbólica"
-    }
-  ]
-}
-```
+#### Modos
 
-#### Modos de juego
+| Modo | Cartas |
+|------|--------|
+| Simple | 22 Arcanos Mayores |
+| Completo | 78 cartas (Mayores + Menores) |
 
-| Modo | Cartas | Descripción |
-|------|--------|-------------|
-| Simple | 22 | Solo Arcanos Mayores — más psicológico, recomendado para principiantes |
-| Completo | 78 | 22 Mayores + 56 Menores (Bastos, Copas, Espadas, Oros) |
+#### Mecánica (diferente a española)
 
-#### Mecánica de mezcla y corte (diferente a española)
+- Mezcla: pensando en la pregunta, 7 recomendadas (no obligatorio)
+- **Corte en 3 montones**: usuario elige el orden → Mente / Emoción / Acción
+- Tirada en cruz: mismas 5 posiciones que española
+- Cartas aclaratorias opcionales (solo si hay contradicción o carta muy fuerte)
 
-**Paso 1 — Mezcla:**
-- El consultante mezcla pensando en su pregunta
-- Se recomiendan 7 mezclas completas pero no es obligatorio
-- Sin número exacto impuesto
+#### Implementación pendiente
 
-**Paso 2 — Corte en 3 montones:**
-- Se divide el mazo en 3 montones
-- El consultante **elige el orden** para reagruparlos
-- El orden elegido representa simbólicamente:
-  - Montón 1 → **Mente**
-  - Montón 2 → **Emoción**
-  - Montón 3 → **Acción**
-  - *(o Pasado / Presente / Futuro según escuela)*
-- En la app: 3 pilas clickeables, el usuario hace click en el orden que quiere
-
-#### Tirada en Cruz (5 cartas) — misma estructura que española
-
-```
-          [Arriba]
-           Futuro
-
-[Izq]    [Centro]    [Der]
-Pasado   Presente    Consejo
-
-          [Abajo]
-          Resultado
-```
-
-| Posición | Significado |
-|----------|-------------|
-| Centro | Situación actual |
-| Arriba | Lo que favorece / futuro cercano |
-| Abajo | Base / raíz del problema |
-| Izquierda | Pasado |
-| Derecha | Futuro inmediato o Consejo |
-
-#### Cartas aclaratorias (opcional, post-tirada)
-
-- Solo si hay contradicción entre cartas
-- Solo si cae una carta muy fuerte (ej: La Muerte, La Torre)
-- Se llama "Carta aclaratoria" — se roba 1 carta adicional para esa posición
-- No es parte de la cruz base, es un añadido
-
-#### Diferencias clave vs Baraja Española
-
-| Aspecto | Española | Tarot |
-|---------|----------|-------|
-| Enfoque | Predictivo | Psicológico / simbólico |
-| Figuras | Sociales (sota, caballo, rey) | Arquetipos universales |
-| Profundidad simbólica | Media | Alta |
-| Cartas | 40 | 78 |
-| Inversión | Sí | Sí |
-
-#### Prompt IA para tarot
-
-El prompt de Groq para tarot va a usar los campos de la API directamente:
-- `meaning_up` / `meaning_rev` según si la carta está invertida
-- Los campos temáticos (`amor`, `trabajo`, etc.) si el consultante eligió un tema
-- El `desc` para enriquecer la interpretación simbólica
-
-#### Implementación — tareas pendientes
-
-- [ ] Componente selector de modo: `EspañolasMode` / `TarotMayores` / `TarotCompleto`
-- [ ] Fetch y cache de la API de tarot (se puede guardar en un JSON estático para no depender de la API en runtime)
-- [ ] Componente de corte en 3 montones con drag o click
-- [ ] Componente de carta aclaratoria
-- [ ] Adaptar `route.js` para recibir cartas de tarot y usar sus campos `meaning_up`/`meaning_rev`
-- [ ] Imágenes: la API devuelve URLs propias, verificar que sean accesibles
+- [ ] Cachear JSON de la API de tarot en `public/` o `lib/` para no depender de la API en runtime
+- [ ] `components/tarot/TiradaTarot.jsx` — mismo patrón que `TiradaEspanola.jsx`
+- [ ] `components/tarot/CorteTresMontones.jsx` — 3 pilas clickeables con drag o click
+- [ ] Adaptar `route.js` para recibir `meaning_up`/`meaning_rev` de la API y usarlos en el prompt
+- [ ] Activar en `ModoApp.jsx`: cambiar `disponible: false` a `true` y renderizar `TiradaTarot`
 
 ---
 
 ## SEO
 
-- **Keywords objetivo:** tarot online argentina, tarot rosario, cartas españolas online, tirada gratis, tarot con IA
-- Metadata en `layout.js` con OG tags y lang="es"
+- Keywords: tarot online argentina, tarot rosario, cartas españolas online, tirada gratis, tarot con IA
+- Metadata + OG tags en `layout.js`, `lang="es"`
 - JSON-LD `WebApplication` con geolocalización Argentina
-- Sección FAQ accordion en landing (5 preguntas)
-- Sección descriptiva con texto rico en keywords
+- FAQ accordion (5 preguntas) + sección descriptiva con keywords
 
 ---
 
@@ -220,4 +228,4 @@ El prompt de Groq para tarot va a usar los campos de la API directamente:
 |----------|-------------|
 | `GROQ_API_KEY` | API key de [console.groq.com](https://console.groq.com) — plan gratuito |
 
-Ver `.env.local.example` para referencia.
+Ver `.env.local.example`. En Vercel: Settings → Environment Variables.

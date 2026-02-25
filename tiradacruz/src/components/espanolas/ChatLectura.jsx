@@ -27,18 +27,28 @@ export default function ChatLectura({
   error,
   cartasTirada,
   onEnviar,
+  esperandoPreguntaNuevaTirada = false,
+  onInterpretarConPregunta,
+  siempreVisible = false,
 }) {
   const [input, setInput] = useState("")
-  const bottomRef = useRef(null)
+  const messagesRef = useRef(null)
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+    if (messagesRef.current) {
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight
+    }
   }, [mensajes, cargando])
 
   const handleEnviar = () => {
     const texto = input.trim()
     if (!texto || cargando) return
-    onEnviar(texto)
+    if (esperandoPreguntaNuevaTirada) {
+      // El input actúa como pregunta de la nueva tirada → dispara interpretación
+      onInterpretarConPregunta(texto)
+    } else {
+      onEnviar(texto)
+    }
     setInput("")
   }
 
@@ -89,32 +99,55 @@ tiradacruz.com
     URL.revokeObjectURL(url)
   }
 
-  if (mensajes.length === 0 && !cargando && !error) return null
+  if (!siempreVisible && mensajes.length === 0 && !cargando && !error && !esperandoPreguntaNuevaTirada) return null
 
   return (
     <div className="mt-10 flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-amber-700">
       {/* Header */}
-      <div className="bg-gradient-to-r from-amber-900 to-purple-950 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-amber-400" />
-          <span className="text-amber-100 font-semibold">Tu Lectura</span>
+      <div className="bg-gradient-to-r from-amber-900 to-purple-950 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-amber-400" />
+            <span className="text-amber-100 font-semibold">Tu Lectura</span>
+          </div>
+          {mensajes.length > 0 && (
+            <button
+              onClick={descargarTxt}
+              className="flex items-center gap-2 text-amber-300 hover:text-amber-100 text-sm transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              Descargar .txt
+            </button>
+          )}
         </div>
-        {mensajes.length > 0 && (
-          <button
-            onClick={descargarTxt}
-            className="flex items-center gap-2 text-amber-300 hover:text-amber-100 text-sm transition-colors"
-          >
-            <Download className="w-4 h-4" />
-            Descargar .txt
-          </button>
-        )}
+        <p className="text-amber-500/70 text-xs mt-1">
+          Generado por Inteligencia Artificial · Solo con fines recreativos · No reemplaza asesoramiento profesional
+        </p>
       </div>
 
       {/* Mensajes */}
-      <div className="bg-amber-950/10 backdrop-blur px-6 py-6 max-h-[520px] overflow-y-auto">
-        {mensajes.map((m, i) => (
-          <BurbujaMensaje key={i} mensaje={m} />
-        ))}
+      <div ref={messagesRef} className="bg-amber-950/10 backdrop-blur px-6 py-6 max-h-[520px] overflow-y-auto">
+        {mensajes.length === 0 && !cargando && !error && !esperandoPreguntaNuevaTirada && (
+          <div className="flex items-center justify-center h-32 text-amber-700/40 text-sm italic select-none">
+            Presioná "Interpretar con IA" para comenzar la lectura
+          </div>
+        )}
+        {mensajes
+          .filter((m) => !("displayContent" in m) || m.displayContent)
+          .map((m, i) => (
+            <BurbujaMensaje
+              key={i}
+              mensaje={"displayContent" in m ? { role: m.role, content: m.displayContent } : m}
+            />
+          ))}
+
+        {esperandoPreguntaNuevaTirada && (
+          <div className="flex justify-start mb-4">
+            <div className="bg-amber-800/40 border border-amber-600/50 rounded-2xl rounded-tl-sm px-5 py-4 text-amber-200 text-sm italic max-w-[85%]">
+              Nueva tirada lista. Escribí tu pregunta abajo y presioná Enter — o cerrá el chat y usá el botón "Interpretar con IA" para ir directo.
+            </div>
+          </div>
+        )}
 
         {cargando && (
           <div className="flex justify-start mb-4">
@@ -133,7 +166,6 @@ tiradacruz.com
           </div>
         )}
 
-        <div ref={bottomRef} />
       </div>
 
       {/* Input seguimiento */}
@@ -141,7 +173,11 @@ tiradacruz.com
         <textarea
           rows={2}
           className="flex-1 resize-none rounded-xl border border-amber-300 px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
-          placeholder="Seguí preguntando sobre tu tirada..."
+          placeholder={
+            esperandoPreguntaNuevaTirada
+              ? "Escribí tu pregunta para esta nueva tirada y presioná Enter..."
+              : "Seguí preguntando sobre tu tirada..."
+          }
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
