@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import TiradaEspanola from "@/components/espanolas/TiradaEspanola"
+import TiradaTarot from "@/components/tarot/TiradaTarot"
 
 const MODOS = [
   {
@@ -16,21 +17,42 @@ const MODOS = [
     label: "Tirada en Cruz",
     sublabel: "Tarot Arcanos",
     emoji: "🔮",
-    disponible: false,
+    disponible: true,
+  },
+]
+
+const SUBMODOS_TAROT = [
+  {
+    id: "mayores",
+    label: "22 Arcanos Mayores",
+    desc: "El camino del alma — los grandes arquetipos",
+  },
+  {
+    id: "completo",
+    label: "78 Cartas completas",
+    desc: "Arcanos Mayores y Menores",
   },
 ]
 
 export default function ModoApp() {
   const [modo, setModo] = useState("espanolas")
+  const [submodoTarot, setSubmodoTarot] = useState(null) // null = aún no eligió
+
+  const handleSeleccionarModo = (id) => {
+    if (id === "tarot") {
+      setSubmodoTarot(null) // resetea selección de submodo al cambiar a tarot
+    }
+    setModo(id)
+  }
 
   return (
     <>
-      {/* Selector de modo */}
-      <div className="flex justify-center gap-4 mb-10 flex-wrap">
+      {/* Selector de modo principal */}
+      <div className="flex justify-center gap-4 mb-8 flex-wrap">
         {MODOS.map((m) => (
           <button
             key={m.id}
-            onClick={() => m.disponible && setModo(m.id)}
+            onClick={() => m.disponible && handleSeleccionarModo(m.id)}
             className={`relative flex flex-col items-center gap-1 px-8 py-5 rounded-2xl border-2 font-semibold transition-all shadow-md
               ${
                 m.disponible
@@ -44,11 +66,6 @@ export default function ModoApp() {
             <span className="text-3xl">{m.emoji}</span>
             <span className="text-base">{m.label}</span>
             <span className="text-xs font-normal opacity-70">{m.sublabel}</span>
-            {!m.disponible && (
-              <span className="absolute -top-2 -right-2 bg-purple-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                Pronto
-              </span>
-            )}
             {modo === m.id && m.disponible && (
               <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-2 h-2 bg-amber-500 rounded-full" />
             )}
@@ -56,16 +73,28 @@ export default function ModoApp() {
         ))}
       </div>
 
-      {/* Contenido del modo seleccionado */}
-      {modo === "espanolas" && <TiradaEspanola />}
-
-      {modo === "tarot" && (
-        <div className="text-center py-20 text-gray-500">
-          <p className="text-6xl mb-4">🔮</p>
-          <p className="text-xl font-semibold text-amber-900">Próximamente</p>
-          <p className="text-gray-500 mt-2">El tarot de Arcanos está en desarrollo.</p>
+      {/* Selector de submodo tarot */}
+      {modo === "tarot" && submodoTarot === null && (
+        <div className="flex flex-col items-center gap-4 mb-8">
+          <p className="text-amber-800 font-medium">¿Con qué mazo querés trabajar?</p>
+          <div className="flex gap-4 flex-wrap justify-center">
+            {SUBMODOS_TAROT.map((sm) => (
+              <button
+                key={sm.id}
+                onClick={() => setSubmodoTarot(sm.id)}
+                className="flex flex-col items-center gap-1 px-6 py-4 rounded-xl border-2 border-purple-300 bg-white/70 text-purple-900 hover:border-purple-500 hover:bg-purple-50 transition-all shadow-sm font-semibold"
+              >
+                <span className="text-base">{sm.label}</span>
+                <span className="text-xs font-normal text-purple-500">{sm.desc}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
+
+      {/* Contenido */}
+      {modo === "espanolas" && <TiradaEspanola />}
+      {modo === "tarot" && submodoTarot && <TiradaTarot modo={submodoTarot} />}
     </>
   )
 }
