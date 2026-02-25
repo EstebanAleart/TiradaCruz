@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install groq-sdk)",
+      "Bash(npm show next versions --json)",
+      "Bash(npm show next dist-tags)",
+      "Bash(npm install next@latest)",
+      "Bash(npm audit fix)",
+      "Bash(npm show next version)",
+      "WebFetch(domain:tarot-api-es.vercel.app)",
+      "Bash(npm run build)"
+    ]
+  }
+}
