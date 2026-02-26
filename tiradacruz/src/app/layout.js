@@ -91,6 +91,13 @@ export default function RootLayout({ children }) {
           src="https://pl28802415.effectivegatecpm.com/e9/31/73/e93173988f40c27ebbfbdf0d4b97f451.js"
           strategy="afterInteractive"
         />
+        <Script
+          src="https://quge5.com/88/tag.min.js"
+          data-zone="214701"
+          async
+          data-cfasync="false"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
