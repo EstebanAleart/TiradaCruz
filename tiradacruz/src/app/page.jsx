@@ -3,6 +3,7 @@ import FAQ from "@/components/landing/FAQ"
 import Footer from "@/components/landing/Footer"
 import SeoContent from "@/components/landing/SeoContent"
 import ModoApp from "@/components/ModoApp"
+import AdBanner from "@/components/AdBanner"
 
 export default function Page() {
   return (
@@ -10,6 +11,7 @@ export default function Page() {
       <Hero />
       <main className="max-w-6xl mx-auto p-4 py-10">
         <ModoApp />
+        <AdBanner />
         <SeoContent />
         <FAQ />
       </main>

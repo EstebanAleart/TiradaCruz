@@ -1,15 +1,14 @@
 // Carta de tarot individual: usa la URL de imagen de la API
 // Respeta el mismo patrón visual que CartaEnTirada (espanolas/shared)
 
-const REVERSO_GRADIENT = "bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-950"
-
 function CartaTarotBack() {
   return (
-    <div
-      className={`w-24 h-36 md:w-28 md:h-44 rounded-xl ${REVERSO_GRADIENT} border border-purple-600 shadow-lg flex items-center justify-center`}
-    >
-      <span className="text-purple-400 text-3xl select-none">✦</span>
-    </div>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/tarot/reverso.jpg"
+      alt="Dorso de carta de tarot"
+      className="w-24 h-36 md:w-28 md:h-44 rounded-xl object-cover shadow-lg border border-purple-800"
+    />
   )
 }
 
