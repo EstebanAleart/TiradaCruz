@@ -13,6 +13,7 @@ import EstadoMazo from "@/components/espanolas/EstadoMazo"
 import CruzLayout from "@/components/shared/CruzLayout"
 import ChatLectura from "@/components/espanolas/ChatLectura"
 import PreguntaInput from "@/components/shared/PreguntaInput"
+import { guardarTirada } from "@/lib/historial"
 
 const MENSAJE_INICIAL = "Mezcla las cartas, luego córtalas 1 vez para poder realizar la tirada"
 const POSICIONES = ["Presente", "Futuro", "Resultado", "Pasado", "Consejo"]
@@ -131,6 +132,14 @@ export default function TiradaEspanola() {
         setErrorIA(data.error || "Error al obtener la interpretación")
       } else {
         setConversacion((prev) => [...prev, { role: "assistant", content: data.respuesta }])
+        if (!tiradaYaInterpretada) {
+          guardarTirada({
+            pregunta: pregunta?.trim() || null,
+            cartas: cartasConNombre,
+            resumen: data.respuesta,
+            modo: "espanolas",
+          })
+        }
         setTiradaYaInterpretada(true)
       }
     } catch {

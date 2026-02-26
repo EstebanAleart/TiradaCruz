@@ -13,8 +13,10 @@ import CruzLayoutTarot from "@/components/tarot/CruzLayoutTarot"
 import CorteTresMontones from "@/components/tarot/CorteTresMontones"
 import ChatLectura from "@/components/espanolas/ChatLectura"
 import PreguntaInput from "@/components/shared/PreguntaInput"
+import { guardarTirada } from "@/lib/historial"
 
 const MENSAJE_INICIAL = "Mezcla las cartas y luego realizá el corte en tres montones"
+const MAX_MEZCLAS = 7
 
 // prop modo: "mayores" | "completo"
 export default function TiradaTarot({ modo }) {
@@ -47,14 +49,16 @@ export default function TiradaTarot({ modo }) {
   }
 
   const handleMezclar = () => {
+    if (corteRealizado || mezclas >= MAX_MEZCLAS) return
     setMazo((prev) => mezclarArray(prev))
     setMezclas((prev) => prev + 1)
+    const nuevasMezclas = mezclas + 1
     setMensaje(
       modoContin
-        ? "Mezclando nueva tirada..."
-        : mezclas === 0
-        ? "Mazo mezclado. Podés mezclar más o hacer el corte."
-        : `Mazo mezclado ${mezclas + 1} veces`
+        ? `Mezclando nueva tirada... (${nuevasMezclas}/${MAX_MEZCLAS})`
+        : nuevasMezclas >= MAX_MEZCLAS
+        ? "Mazo mezclado 7 veces. Realizá el corte."
+        : `Mazo mezclado ${nuevasMezclas}/${MAX_MEZCLAS} — podés seguir mezclando o hacer el corte.`
     )
     resetVisual()
   }
@@ -130,6 +134,14 @@ export default function TiradaTarot({ modo }) {
         setErrorIA(data.error || "Error al obtener la interpretación")
       } else {
         setConversacion((prev) => [...prev, { role: "assistant", content: data.respuesta }])
+        if (!tiradaYaInterpretada) {
+          guardarTirada({
+            pregunta: pregunta?.trim() || null,
+            cartas: cartasConNombre,
+            resumen: data.respuesta,
+            modo: modo === "mayores" ? "tarot_mayores" : "tarot_completo",
+          })
+        }
         setTiradaYaInterpretada(true)
       }
     } catch {
@@ -177,6 +189,7 @@ export default function TiradaTarot({ modo }) {
     setTiradaYaInterpretada(false)
   }
 
+  const puedeMezclar = !corteRealizado && mezclas < MAX_MEZCLAS
   const puedeCortar = mezclas >= 1 && !corteRealizado
   const puedeRealizar = mezclas >= 1 && corteRealizado
   const puedeInterpretar = mostrarCartas && !cargandoIA && !tiradaYaInterpretada
@@ -196,6 +209,8 @@ export default function TiradaTarot({ modo }) {
         onContinuar={handleContinuar}
         onReiniciar={handleReiniciar}
         mezclas={mezclas}
+        maxMezclas={MAX_MEZCLAS}
+        puedeMezclar={puedeMezclar}
         puedeRealizar={puedeRealizar}
         puedeInterpretar={puedeInterpretar}
         cargandoIA={cargandoIA}

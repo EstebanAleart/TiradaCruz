@@ -10,23 +10,24 @@ export default function ControlsTarot({
   onContinuar,
   onReiniciar,
   mezclas,
-  puedeRealizar,     // mezcló al menos 1 vez Y cortó
+  maxMezclas,
+  puedeMezclar,
+  puedeRealizar,
   puedeInterpretar,
   cargandoIA,
   hayConversacion,
-  etapa,             // "mezclar" | "cortar" | "tirar" | "listo"
 }) {
   return (
     <div className="flex flex-wrap gap-3 justify-center mb-6">
-      {/* Mezclar — siempre disponible excepto cuando está cargando */}
+      {/* Mezclar — bloqueado después del corte o al llegar a 7 */}
       <Button
         onClick={onMezclar}
-        disabled={cargandoIA}
+        disabled={!puedeMezclar || cargandoIA}
         variant="outline"
-        className="border-amber-400 text-amber-800 hover:bg-amber-50 gap-2"
+        className="border-amber-400 text-amber-800 hover:bg-amber-50 gap-2 disabled:opacity-40"
       >
         <Shuffle className="w-4 h-4" />
-        {mezclas === 0 ? "Mezclar" : `Mezclar (${mezclas})`}
+        {mezclas === 0 ? "Mezclar" : `Mezclar (${mezclas}/${maxMezclas})`}
       </Button>
 
       {/* Tirar — disponible solo una vez cortado */}

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import TiradaEspanola from "@/components/espanolas/TiradaEspanola"
 import TiradaTarot from "@/components/tarot/TiradaTarot"
+import HistorialPanel from "@/components/shared/HistorialPanel"
 
 const MODOS = [
   {
@@ -95,6 +96,8 @@ export default function ModoApp() {
       {/* Contenido */}
       {modo === "espanolas" && <TiradaEspanola />}
       {modo === "tarot" && submodoTarot && <TiradaTarot modo={submodoTarot} />}
+
+      <HistorialPanel />
     </>
   )
 }
