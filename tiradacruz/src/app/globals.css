@@ -112,6 +112,16 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Animación de volteo al revelar carta */
+@keyframes cardReveal {
+  0%   { opacity: 0; transform: rotateY(90deg) scale(0.85); }
+  60%  { transform: rotateY(-4deg) scale(1.03); }
+  100% { opacity: 1; transform: rotateY(0deg) scale(1); }
+}
+.carta-reveal {
+  animation: cardReveal 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
