@@ -49,6 +49,9 @@ export const metadata = {
   verification: {
     google: "Tbg0mHr8Iwyb_QuVnG2YiUYbLjuVbD6LtXrzKK87v8g",
   },
+  other: {
+    "google-adsense-account": "ca-pub-9884098505893083",
+  },
 };
 
 const jsonLd = {
