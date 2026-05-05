@@ -4,6 +4,16 @@ import { supabase } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
+async function login(formData) {
+  'use server'
+  const pwd = formData.get('pwd')
+  if (pwd === process.env.ADMIN_PASSWORD) {
+    const cookieStore = await cookies()
+    cookieStore.set('admin_auth', 'ok', { httpOnly: true, maxAge: 86400, path: '/' })
+  }
+  redirect('/admin')
+}
+
 async function getStats() {
   const hace30dias = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
 
@@ -36,14 +46,12 @@ async function getStats() {
         .gte('created_at', hace30dias),
     ])
 
-  // Visitas por día
   const visitasPorDia = {}
   for (const v of porDia ?? []) {
     const dia = v.created_at.slice(0, 10)
     visitasPorDia[dia] = (visitasPorDia[dia] ?? 0) + 1
   }
 
-  // Top rutas
   const conteoRutas = {}
   for (const v of porRuta ?? []) {
     conteoRutas[v.ruta] = (conteoRutas[v.ruta] ?? 0) + 1
@@ -52,7 +60,6 @@ async function getStats() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 15)
 
-  // Top ciudades
   const conteoCiudades = {}
   for (const v of porCiudad ?? []) {
     if (v.ciudad_nombre) conteoCiudades[v.ciudad_nombre] = (conteoCiudades[v.ciudad_nombre] ?? 0) + 1
@@ -61,13 +68,11 @@ async function getStats() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10)
 
-  // Split modo
   const modos = {}
   for (const v of porModo ?? []) {
     modos[v.modo ?? 'desconocido'] = (modos[v.modo ?? 'desconocido'] ?? 0) + 1
   }
 
-  // Split dispositivo
   const dispositivos = {}
   for (const v of porDispositivo ?? []) {
     dispositivos[v.dispositivo ?? 'desconocido'] = (dispositivos[v.dispositivo ?? 'desconocido'] ?? 0) + 1
@@ -77,22 +82,13 @@ async function getStats() {
 }
 
 export default async function AdminPage({ searchParams }) {
-  const sp = await searchParams
   const cookieStore = await cookies()
   const autenticado = cookieStore.get('admin_auth')?.value === 'ok'
 
-  // Login
   if (!autenticado) {
-    if (sp.pwd === process.env.ADMIN_PASSWORD) {
-      const { redirect: redir } = await import('next/navigation')
-      const res = new Response(null, { status: 302, headers: { Location: '/admin' } })
-      res.headers.append('Set-Cookie', 'admin_auth=ok; Path=/; HttpOnly; Max-Age=86400')
-      return res
-    }
-
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <form method="get" action="/admin" className="bg-gray-900 p-8 rounded-xl flex flex-col gap-4 w-80">
+        <form action={login} className="bg-gray-900 p-8 rounded-xl flex flex-col gap-4 w-80">
           <h1 className="text-white text-xl font-bold text-center">Admin TiradaCruz</h1>
           <input
             type="password"
@@ -122,7 +118,6 @@ export default async function AdminPage({ searchParams }) {
           <span className="text-gray-400 text-sm">Últimos 30 días</span>
         </div>
 
-        {/* KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-gray-900 rounded-xl p-4">
             <p className="text-gray-400 text-xs mb-1">Total visitas</p>
@@ -139,12 +134,11 @@ export default async function AdminPage({ searchParams }) {
           <div className="bg-gray-900 rounded-xl p-4">
             <p className="text-gray-400 text-xs mb-1">Mobile</p>
             <p className="text-3xl font-bold text-blue-400">
-              {dispositivos['mobile'] ? Math.round((dispositivos['mobile'] / total) * 100) : 0}%
+              {dispositivos['mobile'] && total > 0 ? Math.round((dispositivos['mobile'] / total) * 100) : 0}%
             </p>
           </div>
         </div>
 
-        {/* Gráfico por día */}
         <div className="bg-gray-900 rounded-xl p-6 mb-6">
           <h2 className="text-sm font-semibold text-gray-400 mb-4">Visitas últimos 14 días</h2>
           <div className="flex items-end gap-1 h-32">
@@ -164,7 +158,6 @@ export default async function AdminPage({ searchParams }) {
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Top rutas */}
           <div className="bg-gray-900 rounded-xl p-6">
             <h2 className="text-sm font-semibold text-gray-400 mb-4">Top páginas</h2>
             <div className="space-y-2">
@@ -177,7 +170,6 @@ export default async function AdminPage({ searchParams }) {
             </div>
           </div>
 
-          {/* Top ciudades */}
           <div className="bg-gray-900 rounded-xl p-6">
             <h2 className="text-sm font-semibold text-gray-400 mb-4">Top ciudades</h2>
             <div className="space-y-2">
@@ -191,7 +183,6 @@ export default async function AdminPage({ searchParams }) {
           </div>
         </div>
 
-        {/* Dispositivos */}
         <div className="bg-gray-900 rounded-xl p-6 mt-6">
           <h2 className="text-sm font-semibold text-gray-400 mb-4">Dispositivos</h2>
           <div className="flex gap-6">
@@ -199,7 +190,7 @@ export default async function AdminPage({ searchParams }) {
               <div key={d} className="flex items-center gap-2 text-sm">
                 <span className="text-gray-300 capitalize">{d}</span>
                 <span className="text-amber-400 font-mono">{count}</span>
-                <span className="text-gray-500">({Math.round((count / total) * 100)}%)</span>
+                {total > 0 && <span className="text-gray-500">({Math.round((count / total) * 100)}%)</span>}
               </div>
             ))}
           </div>
