@@ -1,0 +1,82 @@
+[
+  {
+    "id": "amor",
+    "nombre": "Amor",
+    "icono": "♥",
+    "descripcion": "Tirada de cartas para el amor y las relaciones sentimentales",
+    "pregunta_ejemplo": "¿Qué me depara el amor?",
+    "palabras_clave": ["amor", "relaciones", "pareja", "romance", "sentimientos", "corazón"],
+    "descripcion_seo": "Consultá las cartas sobre el amor: tu relación actual, un nuevo romance o cómo atraer lo que merecés sentimentalmente.",
+    "urgencia": "El amor no espera — las cartas revelan lo que el corazón necesita escuchar hoy."
+  },
+  {
+    "id": "trabajo",
+    "nombre": "Trabajo",
+    "icono": "💼",
+    "descripcion": "Tirada de cartas para el trabajo, la carrera y los proyectos profesionales",
+    "pregunta_ejemplo": "¿Cómo va a ir mi trabajo?",
+    "palabras_clave": ["trabajo", "carrera", "empleo", "negocio", "profesión", "dinero", "éxito"],
+    "descripcion_seo": "Las cartas revelan lo que viene en tu vida profesional: si cambiar de trabajo, cómo avanzar en tu carrera o qué hacer con tu negocio.",
+    "urgencia": "Cada decisión laboral que tomás hoy define tu mañana — consultá las cartas antes de actuar."
+  },
+  {
+    "id": "salud",
+    "nombre": "Salud",
+    "icono": "🌿",
+    "descripcion": "Tirada de cartas para la salud, el bienestar y el equilibrio energético",
+    "pregunta_ejemplo": "¿Qué dicen las cartas sobre mi salud?",
+    "palabras_clave": ["salud", "bienestar", "energía", "equilibrio", "cuerpo", "mente"],
+    "descripcion_seo": "Las cartas orientan sobre tu salud física y energética, el bienestar emocional y los aspectos que necesitás atender para estar en equilibrio.",
+    "urgencia": "Tu cuerpo y tu energía hablan — las cartas te ayudan a escucharlos con claridad."
+  },
+  {
+    "id": "dinero",
+    "nombre": "Dinero",
+    "icono": "💰",
+    "descripcion": "Tirada de cartas para las finanzas, el dinero y la prosperidad",
+    "pregunta_ejemplo": "¿Cómo vienen las finanzas?",
+    "palabras_clave": ["dinero", "finanzas", "prosperidad", "abundancia", "inversión", "deudas"],
+    "descripcion_seo": "Consultá las cartas sobre tu situación financiera: si viene abundancia, cómo manejar las deudas o si es momento de invertir.",
+    "urgencia": "La prosperidad tiene su momento — las cartas te dicen si ese momento es ahora."
+  },
+  {
+    "id": "futuro",
+    "nombre": "Futuro",
+    "icono": "🔮",
+    "descripcion": "Tirada de cartas para conocer lo que viene y orientar las decisiones importantes",
+    "pregunta_ejemplo": "¿Qué me depara el futuro?",
+    "palabras_clave": ["futuro", "destino", "camino", "decisiones", "qué viene", "predicción"],
+    "descripcion_seo": "Las cartas revelan tendencias y posibilidades sobre lo que viene: decisiones importantes, cambios y el camino que se abre ante vos.",
+    "urgencia": "El futuro se construye con las decisiones de hoy — las cartas te muestran el camino."
+  },
+  {
+    "id": "pareja",
+    "nombre": "Pareja",
+    "icono": "💑",
+    "descripcion": "Tirada de cartas específica para la relación de pareja y el vínculo amoroso",
+    "pregunta_ejemplo": "¿Qué pasa con mi pareja?",
+    "palabras_clave": ["pareja", "relación", "vínculo", "noviazgo", "convivencia", "compromiso"],
+    "descripcion_seo": "Las cartas revelan la energía de tu relación de pareja: lo que siente el otro, los desafíos del vínculo y hacia dónde va la relación.",
+    "urgencia": "Las relaciones necesitan claridad — las cartas dicen lo que las palabras no siempre pueden."
+  },
+  {
+    "id": "familia",
+    "nombre": "Familia",
+    "icono": "🏠",
+    "descripcion": "Tirada de cartas sobre los vínculos familiares, el hogar y las relaciones con los tuyos",
+    "pregunta_ejemplo": "¿Qué pasa en mi familia?",
+    "palabras_clave": ["familia", "hogar", "padres", "hijos", "hermanos", "vínculos", "casa"],
+    "descripcion_seo": "Consultá las cartas sobre tu familia: los vínculos, conflictos o decisiones del hogar que necesitás ver con más claridad.",
+    "urgencia": "La familia es el pilar de todo — las cartas ayudan a sanar y fortalecer esos vínculos."
+  },
+  {
+    "id": "suerte",
+    "nombre": "Suerte",
+    "icono": "⭐",
+    "descripcion": "Tirada de cartas sobre la energía, la suerte y los momentos favorables",
+    "pregunta_ejemplo": "¿Cómo viene la suerte?",
+    "palabras_clave": ["suerte", "energía", "oportunidades", "momento", "fortuna", "azar"],
+    "descripcion_seo": "Las cartas revelan tu momento energético: si la suerte está de tu lado, qué oportunidades vienen y cómo potenciar tu energía positiva.",
+    "urgencia": "La suerte no es ciega — las cartas te muestran cuándo y cómo aprovechar tu mejor momento."
+  }
+]

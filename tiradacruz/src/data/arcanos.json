@@ -1,0 +1,200 @@
+[
+  {
+    "id": "el-loco",
+    "nombre": "El Loco",
+    "numero": 0,
+    "nombre_short": "ar22",
+    "palabras_clave": ["libertad", "nuevos comienzos", "aventura", "espontaneidad", "fe"],
+    "significado_seo": "El Loco representa el inicio de un nuevo ciclo, la libertad absoluta y el coraje de lanzarse a lo desconocido sin miedo al qué dirán.",
+    "significado_corto": "Nuevos comienzos, aventura y libertad sin ataduras."
+  },
+  {
+    "id": "el-mago",
+    "nombre": "El Mago",
+    "numero": 1,
+    "nombre_short": "ar01",
+    "palabras_clave": ["voluntad", "poder", "habilidad", "manifestación", "acción"],
+    "significado_seo": "El Mago simboliza la voluntad de manifestar tus deseos, el poder personal y la capacidad de usar todos tus recursos para lograr lo que querés.",
+    "significado_corto": "Poder personal, habilidad y capacidad de manifestar lo que deseás."
+  },
+  {
+    "id": "la-sacerdotisa",
+    "nombre": "La Sacerdotisa",
+    "numero": 2,
+    "nombre_short": "ar02",
+    "palabras_clave": ["intuición", "misterio", "sabiduría interior", "secretos", "espiritualidad"],
+    "significado_seo": "La Sacerdotisa invita a escuchar la voz interior, confiar en la intuición y explorar los misterios que aún no se han revelado en tu vida.",
+    "significado_corto": "Intuición, sabiduría oculta y escucha del mundo interior."
+  },
+  {
+    "id": "la-emperatriz",
+    "nombre": "La Emperatriz",
+    "numero": 3,
+    "nombre_short": "ar03",
+    "palabras_clave": ["fertilidad", "abundancia", "creatividad", "naturaleza", "amor maternal"],
+    "significado_seo": "La Emperatriz representa la fertilidad en todos los planos: creatividad, abundancia material, amor y la capacidad de nutrir proyectos y vínculos.",
+    "significado_corto": "Abundancia, fertilidad y poder creativo en plena expansión."
+  },
+  {
+    "id": "el-emperador",
+    "nombre": "El Emperador",
+    "numero": 4,
+    "nombre_short": "ar04",
+    "palabras_clave": ["autoridad", "estabilidad", "logro", "estructura", "poder"],
+    "significado_seo": "El Emperador simboliza la autoridad, el orden y la capacidad de construir estructuras sólidas que soporten el peso de los objetivos más ambiciosos.",
+    "significado_corto": "Autoridad, estructura y logros construidos con disciplina."
+  },
+  {
+    "id": "el-papa",
+    "nombre": "El Papa",
+    "numero": 5,
+    "nombre_short": "ar05",
+    "palabras_clave": ["tradición", "guía espiritual", "instituciones", "sabiduría", "enseñanza"],
+    "significado_seo": "El Papa representa la guía espiritual, el valor de la tradición y la sabiduría que se transmite a través de los maestros y las instituciones.",
+    "significado_corto": "Guía, tradición y sabiduría que viene de un maestro o institución."
+  },
+  {
+    "id": "los-amantes",
+    "nombre": "Los Amantes",
+    "numero": 6,
+    "nombre_short": "ar06",
+    "palabras_clave": ["amor", "elección", "unión", "valores", "armonía", "decisión"],
+    "significado_seo": "Los Amantes representan la unión armoniosa, pero también la necesidad de elegir con el corazón alineado con los propios valores y convicciones.",
+    "significado_corto": "Unión, amor verdadero y decisiones que vienen del corazón."
+  },
+  {
+    "id": "el-carro",
+    "nombre": "El Carro",
+    "numero": 7,
+    "nombre_short": "ar07",
+    "palabras_clave": ["triunfo", "control", "determinación", "viaje", "victoria"],
+    "significado_seo": "El Carro anuncia el triunfo a través del control y la determinación. Es el momento de avanzar con fuerza hacia los objetivos, sin desviarse del camino.",
+    "significado_corto": "Victoria, determinación y avance imparable hacia la meta."
+  },
+  {
+    "id": "la-fuerza",
+    "nombre": "La Fuerza",
+    "numero": 8,
+    "nombre_short": "ar08",
+    "palabras_clave": ["coraje", "paciencia", "fuerza interior", "compasión", "dominio"],
+    "significado_seo": "La Fuerza no es muscular sino interior: la capacidad de enfrentar los miedos con calma, compasión y la convicción de que podés con todo.",
+    "significado_corto": "Fuerza interior, coraje suave y dominio sobre los propios miedos."
+  },
+  {
+    "id": "el-ermitano",
+    "nombre": "El Ermitaño",
+    "numero": 9,
+    "nombre_short": "ar09",
+    "palabras_clave": ["introspección", "búsqueda interior", "soledad", "sabiduría", "guía"],
+    "significado_seo": "El Ermitaño invita a la introspección y el recogimiento. Es el momento de buscar respuestas hacia adentro, lejos del ruido exterior.",
+    "significado_corto": "Búsqueda interior, sabiduría ganada en soledad y reflexión profunda."
+  },
+  {
+    "id": "la-rueda-de-la-fortuna",
+    "nombre": "La Rueda de la Fortuna",
+    "numero": 10,
+    "nombre_short": "ar10",
+    "palabras_clave": ["cambio", "ciclos", "destino", "fortuna", "giro"],
+    "significado_seo": "La Rueda de la Fortuna anuncia un giro del destino. Todo cambia, los ciclos se cierran y se abren — es momento de fluir con los cambios que vienen.",
+    "significado_corto": "Cambios de ciclo, giro del destino y nuevas oportunidades."
+  },
+  {
+    "id": "la-justicia",
+    "nombre": "La Justicia",
+    "numero": 11,
+    "nombre_short": "ar11",
+    "palabras_clave": ["justicia", "equilibrio", "verdad", "karma", "decisión legal"],
+    "significado_seo": "La Justicia representa el equilibrio kármico, la verdad que sale a la luz y la necesidad de actuar con honestidad y equidad en toda decisión.",
+    "significado_corto": "Equilibrio, verdad y justicia que se impone en el momento justo."
+  },
+  {
+    "id": "el-colgado",
+    "nombre": "El Colgado",
+    "numero": 12,
+    "nombre_short": "ar12",
+    "palabras_clave": ["pausa", "entrega", "perspectiva", "sacrificio", "iluminación"],
+    "significado_seo": "El Colgado invita a hacer una pausa voluntaria, ver las cosas desde otra perspectiva y soltar el control para que llegue una comprensión más profunda.",
+    "significado_corto": "Pausa necesaria, cambio de perspectiva y entrega voluntaria."
+  },
+  {
+    "id": "la-muerte",
+    "nombre": "La Muerte",
+    "numero": 13,
+    "nombre_short": "ar13",
+    "palabras_clave": ["transformación", "fin de ciclo", "cambio", "renacimiento", "transición"],
+    "significado_seo": "La Muerte no es el fin sino la transformación más profunda: el cierre de un ciclo que permite el nacimiento de algo completamente nuevo en tu vida.",
+    "significado_corto": "Transformación radical y cierre de ciclo para renacer renovado."
+  },
+  {
+    "id": "la-templanza",
+    "nombre": "La Templanza",
+    "numero": 14,
+    "nombre_short": "ar14",
+    "palabras_clave": ["equilibrio", "moderación", "paciencia", "armonía", "integración"],
+    "significado_seo": "La Templanza anuncia el momento de encontrar el equilibrio entre los extremos, integrar las diferentes partes de uno mismo y actuar con paciencia y moderación.",
+    "significado_corto": "Armonía, paciencia y equilibrio entre los opuestos de tu vida."
+  },
+  {
+    "id": "el-diablo",
+    "nombre": "El Diablo",
+    "numero": 15,
+    "nombre_short": "ar15",
+    "palabras_clave": ["ataduras", "sombras", "materialismo", "obsesión", "liberación"],
+    "significado_seo": "El Diablo revela las cadenas invisibles que limitan tu libertad: miedos, vicios, dependencias o creencias que ya es hora de soltar para avanzar.",
+    "significado_corto": "Ataduras, sombras internas y la invitación a liberarse de lo que limita."
+  },
+  {
+    "id": "la-torre",
+    "nombre": "La Torre",
+    "numero": 16,
+    "nombre_short": "ar16",
+    "palabras_clave": ["ruptura", "caos", "revelación", "cambio abrupto", "liberación"],
+    "significado_seo": "La Torre anuncia un cambio abrupto e inevitable que derrumba lo que estaba construido sobre bases falsas, abriendo espacio para algo más auténtico.",
+    "significado_corto": "Cambio inesperado y ruptura que limpia el camino hacia algo real."
+  },
+  {
+    "id": "la-estrella",
+    "nombre": "La Estrella",
+    "numero": 17,
+    "nombre_short": "ar17",
+    "palabras_clave": ["esperanza", "inspiración", "renovación", "fe", "sanación"],
+    "significado_seo": "La Estrella trae esperanza, sanación y renovación después de las tormentas. Es el faro que ilumina el camino cuando todo parecía oscuro.",
+    "significado_corto": "Esperanza renovada, sanación y fe en el futuro que se abre."
+  },
+  {
+    "id": "la-luna",
+    "nombre": "La Luna",
+    "numero": 18,
+    "nombre_short": "ar18",
+    "palabras_clave": ["ilusión", "inconsciente", "miedos", "intuición", "misterio"],
+    "significado_seo": "La Luna ilumina el inconsciente, los miedos no reconocidos y las ilusiones. Invita a confiar en la intuición para navegar lo que no puede verse claramente.",
+    "significado_corto": "Misterio, ilusiones y la invitación a confiar en la intuición profunda."
+  },
+  {
+    "id": "el-sol",
+    "nombre": "El Sol",
+    "numero": 19,
+    "nombre_short": "ar19",
+    "palabras_clave": ["alegría", "éxito", "vitalidad", "claridad", "logro"],
+    "significado_seo": "El Sol es una de las cartas más positivas: anuncia alegría, claridad, éxito y la energía para brillar con autenticidad en todas las áreas de la vida.",
+    "significado_corto": "Alegría plena, éxito y la energía para brillar en todo lo que hacés."
+  },
+  {
+    "id": "el-juicio",
+    "nombre": "El Juicio",
+    "numero": 20,
+    "nombre_short": "ar20",
+    "palabras_clave": ["renacimiento", "llamado", "absolución", "reflexión", "nueva etapa"],
+    "significado_seo": "El Juicio anuncia un llamado profundo al renacimiento: es momento de reflexionar sobre el pasado, soltar lo que ya no sirve y responder al llamado de una nueva etapa.",
+    "significado_corto": "Renacimiento, absolución del pasado y llamado a una nueva etapa."
+  },
+  {
+    "id": "el-mundo",
+    "nombre": "El Mundo",
+    "numero": 21,
+    "nombre_short": "ar21",
+    "palabras_clave": ["completitud", "logro", "plenitud", "integración", "éxito total"],
+    "significado_seo": "El Mundo es la carta de la plenitud total: el ciclo completado, el logro máximo y la sensación de que todo está en su lugar exacto.",
+    "significado_corto": "Plenitud, ciclo completado y el logro de lo que tanto buscabas."
+  }
+]
