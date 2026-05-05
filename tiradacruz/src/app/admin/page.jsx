@@ -42,7 +42,8 @@ async function getStats() {
         .select('dispositivo')
         .gte('created_at', hace30dias),
       supabase
-        .from('visitas', { count: 'exact', head: true })
+        .from('visitas')
+        .select('*', { count: 'exact', head: true })
         .gte('created_at', hace30dias),
     ])
 
@@ -81,7 +82,7 @@ async function getStats() {
   return { total: total ?? 0, visitasPorDia, topRutas, topCiudades, modos, dispositivos }
 }
 
-export default async function AdminPage({ searchParams }) {
+export default async function AdminPage() {
   const cookieStore = await cookies()
   const autenticado = cookieStore.get('admin_auth')?.value === 'ok'
 
