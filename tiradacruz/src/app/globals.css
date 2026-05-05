@@ -112,15 +112,14 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* Animación de volteo al revelar carta */
-@keyframes cardReveal {
-  0%   { opacity: 0; transform: rotateY(90deg) scale(0.85); }
-  60%  { transform: rotateY(-4deg) scale(1.03); }
-  100% { opacity: 1; transform: rotateY(0deg) scale(1); }
+@keyframes shuffleCard {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  25%  { transform: translate(-9px, -3px) rotate(-6deg); }
+  55%  { transform: translate(9px, -1px) rotate(5deg); }
+  80%  { transform: translate(-4px, 0) rotate(-2deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
 }
-.carta-reveal {
-  animation: cardReveal 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-}
+.shuffle-anim { animation: shuffleCard 0.45s ease-out both; }
 
 @layer base {
   * {

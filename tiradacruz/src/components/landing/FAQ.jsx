@@ -14,7 +14,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "¿Qué es la tirada en cruz?",
-    a: "La tirada en cruz es una de las consultas más populares del tarot. Usa 5 cartas dispuestas en forma de cruz que representan el presente, futuro, resultado, pasado y consejo.",
+    a: "La tirada en cruz usa 5 cartas dispuestas en forma de cruz que representan el presente, futuro, resultado, pasado y consejo. Es una de las consultas más populares del tarot.",
   },
   {
     q: "¿Cómo funciona la interpretación con IA?",
@@ -31,30 +31,30 @@ export default function FAQ() {
 
   return (
     <section className="mt-10 mb-16">
-      <div className="bg-white/70 rounded-2xl p-8 shadow border border-amber-100">
-        <h2 className="text-3xl font-bold text-amber-900 mb-6">Preguntas Frecuentes</h2>
-        <div className="space-y-3">
-          {FAQ_ITEMS.map((item, i) => (
-            <div key={i} className="border border-amber-200 rounded-xl overflow-hidden">
-              <button
-                className="w-full text-left px-6 py-4 font-semibold text-amber-900 flex justify-between items-center hover:bg-amber-50 transition-colors"
-                onClick={() => setAbierto(abierto === i ? null : i)}
-              >
-                <span>{item.q}</span>
-                <ChevronDown
-                  className={`w-5 h-5 text-amber-600 transition-transform ${
-                    abierto === i ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-              {abierto === i && (
-                <div className="px-6 py-4 text-gray-700 bg-amber-50/50 border-t border-amber-100">
-                  {item.a}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+      <h2 className="text-lg font-bold text-white mb-4">Preguntas frecuentes</h2>
+      <div className="space-y-2">
+        {FAQ_ITEMS.map((item, i) => (
+          <div
+            key={i}
+            className="rounded-xl overflow-hidden"
+            style={{ border: "1px solid rgba(255,255,255,0.06)", background: "#0c0c18" }}
+          >
+            <button
+              className="w-full text-left px-5 py-4 font-medium text-slate-300 flex justify-between items-center gap-4 hover:text-white transition-colors"
+              onClick={() => setAbierto(abierto === i ? null : i)}
+            >
+              <span className="text-sm">{item.q}</span>
+              <ChevronDown
+                className={`w-4 h-4 text-slate-600 shrink-0 transition-transform duration-200 ${abierto === i ? "rotate-180" : ""}`}
+              />
+            </button>
+            {abierto === i && (
+              <div className="px-5 pb-5 text-slate-500 text-sm leading-relaxed" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                <p className="pt-3">{item.a}</p>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </section>
   )

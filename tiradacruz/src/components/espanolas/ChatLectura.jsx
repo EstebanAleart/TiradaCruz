@@ -37,6 +37,7 @@ export default function ChatLectura({
   onEnviar,
   esperandoPreguntaNuevaTirada = false,
   onInterpretarConPregunta,
+  className,
   siempreVisible = false,
 }) {
   const [input, setInput] = useState("")
@@ -110,7 +111,7 @@ tiradacruz.com
   if (!siempreVisible && mensajes.length === 0 && !cargando && !error && !esperandoPreguntaNuevaTirada) return null
 
   return (
-    <div className="mt-10 flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-amber-700">
+    <div className={`${className ?? "mt-10"} flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-amber-700`}>
       {/* Header */}
       <div className="bg-gradient-to-r from-amber-900 to-purple-950 px-6 py-4">
         <div className="flex items-center justify-between">

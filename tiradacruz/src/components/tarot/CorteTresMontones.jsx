@@ -3,125 +3,101 @@
 import { useState } from "react"
 import { RotateCcw } from "lucide-react"
 
-const LABELS_ORDEN = ["Mente", "Emoción", "Acción"]
+const LABELS = ["Mente", "Emoción", "Acción"]
 
-// Visualiza un montón de cartas boca abajo
-function Monton({ idx, numeroSeleccion, onClick }) {
-  const seleccionada = numeroSeleccion !== null
+function Monton({ idx, orden, onClick }) {
+  const pos = orden.indexOf(idx)
+  const seleccionado = pos !== -1
 
   return (
     <button
-      onClick={() => onClick(idx)}
-      disabled={seleccionada}
-      className={`flex flex-col items-center gap-3 group transition-all ${
-        seleccionada ? "cursor-not-allowed" : "cursor-pointer"
-      }`}
+      onClick={() => !seleccionado && onClick(idx)}
+      className="flex flex-col items-center gap-3 group focus:outline-none active:scale-95 transition-transform"
     >
-      {/* Stack de cartas */}
-      <div className="relative w-20 h-32">
+      <div className="relative w-[72px] h-[108px]">
         {[3, 2, 1, 0].map((i) => (
           <div
             key={i}
-            className={`absolute w-20 h-32 rounded-xl border shadow-md transition-all duration-300 ${
-              seleccionada
-                ? "bg-gradient-to-br from-amber-700 via-amber-800 to-amber-900 border-amber-500"
-                : "bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-950 border-purple-600 group-hover:border-purple-400"
-            }`}
-            style={{ top: i * 2, left: i * 1 }}
+            className="absolute w-[72px] h-[108px] rounded-xl transition-all duration-300"
+            style={{
+              top: i * 2.5,
+              left: i * 1.5,
+              zIndex: 4 - i,
+              background: seleccionado
+                ? "linear-gradient(135deg, #78350f 0%, #92400e 100%)"
+                : "linear-gradient(135deg, #1e1b4b 0%, #3730a3 50%, #1e1b4b 100%)",
+              borderWidth: 1,
+              borderStyle: "solid",
+              borderColor: seleccionado
+                ? "rgba(251,191,36,0.35)"
+                : i === 0
+                ? "rgba(167,139,250,0.5)"
+                : "rgba(167,139,250,0.15)",
+            }}
           />
         ))}
 
-        {/* Número de selección superpuesto */}
-        {seleccionada && (
-          <div className="absolute inset-0 flex items-center justify-center z-10">
-            <span className="text-4xl font-bold text-amber-300 drop-shadow-lg">
-              {numeroSeleccion}
-            </span>
+        {seleccionado ? (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-0.5">
+            <span className="text-3xl font-bold text-amber-300 drop-shadow">{pos + 1}</span>
+            <span className="text-[10px] font-semibold text-amber-400/70 tracking-wide uppercase">{LABELS[pos]}</span>
           </div>
-        )}
-
-        {/* Indicador hover */}
-        {!seleccionada && (
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
-            <span className="text-purple-300 text-xs font-medium">Elegir</span>
+        ) : (
+          <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity">
+            <span className="text-purple-300 text-xs font-medium">Tocá</span>
           </div>
         )}
       </div>
 
-      <span
-        className={`text-sm font-medium transition-colors ${
-          seleccionada ? "text-amber-700" : "text-purple-400 group-hover:text-purple-200"
-        }`}
-      >
-        {seleccionada ? LABELS_ORDEN[numeroSeleccion - 1] : `Montón ${idx + 1}`}
+      <span className={`text-xs font-medium transition-colors ${seleccionado ? "text-amber-600/60" : "text-slate-500 group-hover:text-slate-300"}`}>
+        Montón {idx + 1}
       </span>
     </button>
   )
 }
 
 export default function CorteTresMontones({ onCortar }) {
-  const [seleccion, setSeleccion] = useState([]) // [pilaIdx en orden de elección]
+  const [orden, setOrden] = useState([])
 
-  const handleClickPila = (idx) => {
-    if (seleccion.includes(idx)) return
-    const nueva = [...seleccion, idx]
-    setSeleccion(nueva)
-    if (nueva.length === 3) {
-      // Pequeño delay para que el usuario vea la selección completa
-      setTimeout(() => onCortar(nueva), 400)
+  const handleClick = (idx) => {
+    if (orden.includes(idx)) return
+    const nuevo = [...orden, idx]
+    setOrden(nuevo)
+    if (nuevo.length === 3) {
+      setTimeout(() => onCortar(nuevo), 450)
     }
   }
 
-  const numeroPila = (idx) => {
-    const pos = seleccion.indexOf(idx)
-    return pos === -1 ? null : pos + 1
-  }
-
   return (
-    <div className="flex flex-col items-center gap-6 my-6">
+    <div className="flex flex-col items-center gap-6">
       <div className="text-center">
-        <p className="text-amber-800 font-medium mb-1">Corte en tres montones</p>
-        <p className="text-amber-600/80 text-sm">
-          Elegí el orden que más te llame — el primero será tu{" "}
-          <span className="font-semibold">Mente</span>, el segundo tu{" "}
-          <span className="font-semibold">Emoción</span>, el tercero tu{" "}
-          <span className="font-semibold">Acción</span>.
+        <p className="text-slate-200 text-sm font-medium">Elegí el orden de los montones</p>
+        <p className="text-slate-500 text-xs mt-1">
+          1° Mente · 2° Emoción · 3° Acción
         </p>
       </div>
 
-      <div className="flex gap-8 justify-center items-end">
+      <div className="flex gap-5 justify-center items-start">
         {[0, 1, 2].map((idx) => (
-          <Monton
-            key={idx}
-            idx={idx}
-            numeroSeleccion={numeroPila(idx)}
-            onClick={handleClickPila}
-          />
+          <Monton key={idx} idx={idx} orden={orden} onClick={handleClick} />
         ))}
       </div>
 
-      <div className="flex items-center gap-3 h-8">
-        {seleccion.length === 0 && (
-          <p className="text-purple-400/70 text-xs italic">
-            Tocá el montón que más te atraiga primero
-          </p>
+      <div className="h-6 flex items-center gap-3">
+        {orden.length === 0 && (
+          <p className="text-slate-600 text-xs">Tocá el que más te llame primero</p>
         )}
-        {seleccion.length > 0 && seleccion.length < 3 && (
-          <>
-            <p className="text-amber-600 text-xs italic">
-              Elegiste {seleccion.length} de 3...
-            </p>
-            <button
-              onClick={() => setSeleccion([])}
-              className="flex items-center gap-1 text-amber-400 hover:text-amber-600 text-xs transition-colors"
-            >
-              <RotateCcw className="w-3 h-3" />
-              Resetear
-            </button>
-          </>
+        {orden.length > 0 && orden.length < 3 && (
+          <button
+            onClick={() => setOrden([])}
+            className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 text-xs transition-colors"
+          >
+            <RotateCcw className="w-3 h-3" />
+            Resetear
+          </button>
         )}
-        {seleccion.length === 3 && (
-          <p className="text-amber-700 text-xs italic">Corte realizado...</p>
+        {orden.length === 3 && (
+          <p className="text-purple-400/70 text-xs animate-pulse">Uniendo el mazo...</p>
         )}
       </div>
     </div>

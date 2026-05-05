@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:local": "env-cmd -f .env.local.local next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "env-cmd": "^11.0.0",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.6"
   }

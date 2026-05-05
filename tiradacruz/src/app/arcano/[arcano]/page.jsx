@@ -70,53 +70,54 @@ export default async function Page({ params }) {
   const arcanosNext = arcanos.filter((a) => a.numero > arc.numero).slice(0, 2)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
+    <div className="min-h-screen bg-[#050509]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <VisitaTracker data={{ ruta: `/arcano/${arcano}`, modo: 'tarot', arcano_id: arcano }} />
 
-      <header className="text-center py-8 px-4 border-b border-amber-200/50">
-        <a href="/" className="text-sm text-amber-600 hover:text-amber-800 mb-4 inline-block">
+      <header className="text-center py-8 px-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+        <a href="/" className="text-sm text-slate-600 hover:text-slate-400 mb-4 inline-block transition-colors">
           ← TiradaCruz
         </a>
-        <p className="text-sm text-amber-700 mb-2 font-medium">
+        <p className="text-sm font-medium mb-2" style={{ color: "#a78bfa" }}>
           🔮 Arcano Mayor N° {arc.numero}
         </p>
-        <h1 className="text-3xl md:text-4xl font-bold text-amber-900 mb-3">{arc.nombre}</h1>
-        <p className="text-amber-700 max-w-2xl mx-auto text-lg">{arc.significado_corto}</p>
+        <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">{arc.nombre}</h1>
+        <p className="text-slate-400 max-w-2xl mx-auto text-base">{arc.significado_corto}</p>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 pb-16">
-        {/* Significado */}
-        <section className="mt-10">
-          <h2 className="text-2xl font-semibold text-amber-900 mb-4">
+      <main className="max-w-lg mx-auto px-4 pb-16">
+        <section className="mt-8">
+          <h2 className="text-lg font-semibold text-white mb-3">
             Significado de {arc.nombre}
           </h2>
-          <p className="text-amber-800 mb-4">{arc.significado_seo}</p>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <p className="text-slate-400 text-sm leading-relaxed mb-4">{arc.significado_seo}</p>
+          <div className="flex flex-wrap gap-2">
             {arc.palabras_clave.map((kw) => (
-              <span key={kw} className="text-sm px-3 py-1 bg-amber-100 rounded-full text-amber-800 border border-amber-200">
+              <span
+                key={kw}
+                className="text-xs px-3 py-1 rounded-full font-medium"
+                style={{ background: "rgba(124,58,237,0.12)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.2)" }}
+              >
                 {kw}
               </span>
             ))}
           </div>
         </section>
 
-        {/* App */}
-        <section className="mt-12">
-          <h2 className="text-xl font-semibold text-amber-900 mb-2 text-center">
+        <section className="mt-10">
+          <h2 className="text-base font-semibold text-white mb-1 text-center">
             Hacé una tirada completa de tarot
           </h2>
-          <p className="text-center text-amber-700 mb-6 text-sm">
+          <p className="text-center text-slate-500 mb-6 text-sm">
             {arc.nombre} puede aparecer en tu tirada. Consultá lo que viene.
           </p>
           <TiradaTarot />
         </section>
 
-        {/* FAQ */}
-        <section className="mt-12">
-          <h2 className="text-xl font-semibold text-amber-900 mb-4">Preguntas frecuentes</h2>
-          <div className="space-y-3">
+        <section className="mt-10">
+          <h2 className="text-base font-semibold text-white mb-3">Preguntas frecuentes</h2>
+          <div className="space-y-2">
             {[
               {
                 q: `¿Qué significa ${arc.nombre} en el tarot?`,
@@ -127,27 +128,45 @@ export default async function Page({ params }) {
                 a: `En el tarot, ${arc.nombre} no es positivo ni negativo de forma absoluta. Su mensaje depende de la posición en la tirada y las cartas que la rodean. Las palabras clave son: ${arc.palabras_clave.join(', ')}.`,
               },
             ].map(({ q, a }) => (
-              <details key={q} className="bg-white/60 rounded-lg p-4 cursor-pointer">
-                <summary className="font-medium text-amber-900">{q}</summary>
-                <p className="mt-2 text-amber-800 text-sm">{a}</p>
+              <details
+                key={q}
+                className="rounded-xl overflow-hidden cursor-pointer group"
+                style={{ border: "1px solid rgba(255,255,255,0.06)", background: "#0c0c18" }}
+              >
+                <summary className="px-5 py-4 font-medium text-slate-300 text-sm list-none flex justify-between items-center gap-4">
+                  {q}
+                  <span className="text-slate-600 shrink-0">▾</span>
+                </summary>
+                <p className="px-5 pb-4 text-slate-500 text-sm leading-relaxed" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                  <span className="block pt-3">{a}</span>
+                </p>
               </details>
             ))}
           </div>
         </section>
 
-        {/* Navegación entre arcanos */}
         {(arcanosPrev.length > 0 || arcanosNext.length > 0) && (
-          <nav className="mt-10 flex justify-between items-center max-w-xl mx-auto">
-            <div className="flex gap-2">
+          <nav className="mt-8 flex justify-between items-center">
+            <div className="flex gap-2 flex-wrap">
               {arcanosPrev.map((a) => (
-                <a key={a.id} href={`/arcano/${a.id}`} className="text-sm px-3 py-1.5 bg-white/60 hover:bg-white/90 rounded-full text-amber-800 border border-amber-200">
+                <a
+                  key={a.id}
+                  href={`/arcano/${a.id}`}
+                  className="text-xs px-3 py-1.5 rounded-full transition-colors"
+                  style={{ background: "rgba(255,255,255,0.04)", color: "#94a3b8", border: "1px solid rgba(255,255,255,0.07)" }}
+                >
                   ← {a.nombre}
                 </a>
               ))}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap justify-end">
               {arcanosNext.map((a) => (
-                <a key={a.id} href={`/arcano/${a.id}`} className="text-sm px-3 py-1.5 bg-white/60 hover:bg-white/90 rounded-full text-amber-800 border border-amber-200">
+                <a
+                  key={a.id}
+                  href={`/arcano/${a.id}`}
+                  className="text-xs px-3 py-1.5 rounded-full transition-colors"
+                  style={{ background: "rgba(255,255,255,0.04)", color: "#94a3b8", border: "1px solid rgba(255,255,255,0.07)" }}
+                >
                   {a.nombre} →
                 </a>
               ))}
@@ -155,7 +174,7 @@ export default async function Page({ params }) {
           </nav>
         )}
 
-        <p className="text-xs text-amber-500 mt-10 text-center max-w-xl mx-auto">
+        <p className="text-xs text-slate-700 mt-10 text-center">
           Este sitio es para fines de entretenimiento. No reemplaza consejos profesionales médicos, legales ni financieros.
         </p>
       </main>

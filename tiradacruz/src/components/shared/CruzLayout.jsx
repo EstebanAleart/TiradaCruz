@@ -1,26 +1,25 @@
 import CartaEnTirada from "@/components/shared/CartaEnTirada"
 
-// Índices: 0=Presente, 1=Futuro, 2=Resultado, 3=Pasado, 4=Consejo
+// Cruz 3x3: Futuro arriba, Pasado-Presente-Consejo en el medio, Resultado abajo
 export default function CruzLayout({ cartasTirada, mostrar }) {
-  const carta = (i) => cartasTirada[i] ?? null
+  const c = (i) => cartasTirada[i] ?? null
 
   return (
-    <div className="flex flex-col items-center gap-4 md:grid md:grid-cols-3 md:grid-rows-3 md:gap-x-16 md:gap-y-8 md:items-center md:justify-items-center">
-      <div className="md:col-start-2 md:row-start-1">
-        <CartaEnTirada carta={carta(1)} posicion="Futuro" mostrar={mostrar} isReversed={carta(1)?.isReversed} delay={0} />
-      </div>
-      <div className="md:col-start-1 md:row-start-2">
-        <CartaEnTirada carta={carta(3)} posicion="Pasado" mostrar={mostrar} isReversed={carta(3)?.isReversed} delay={150} />
-      </div>
-      <div className="md:col-start-2 md:row-start-2">
-        <CartaEnTirada carta={carta(0)} posicion="Presente" mostrar={mostrar} isReversed={carta(0)?.isReversed} delay={300} />
-      </div>
-      <div className="md:col-start-3 md:row-start-2">
-        <CartaEnTirada carta={carta(4)} posicion="Consejo" mostrar={mostrar} isReversed={carta(4)?.isReversed} delay={450} />
-      </div>
-      <div className="md:col-start-2 md:row-start-3">
-        <CartaEnTirada carta={carta(2)} posicion="Resultado" mostrar={mostrar} isReversed={carta(2)?.isReversed} delay={600} />
-      </div>
+    <div
+      className="grid gap-2 mx-auto"
+      style={{ gridTemplateColumns: "repeat(3, 68px)", gridTemplateRows: "repeat(3, auto)" }}
+    >
+      <div />
+      <CartaEnTirada carta={c(1)} posicion="Futuro"    mostrar={mostrar} isReversed={c(1)?.isReversed} delay={0}   />
+      <div />
+
+      <CartaEnTirada carta={c(3)} posicion="Pasado"    mostrar={mostrar} isReversed={c(3)?.isReversed} delay={200} />
+      <CartaEnTirada carta={c(0)} posicion="Presente"  mostrar={mostrar} isReversed={c(0)?.isReversed} delay={400} />
+      <CartaEnTirada carta={c(4)} posicion="Consejo"   mostrar={mostrar} isReversed={c(4)?.isReversed} delay={600} />
+
+      <div />
+      <CartaEnTirada carta={c(2)} posicion="Resultado" mostrar={mostrar} isReversed={c(2)?.isReversed} delay={800} />
+      <div />
     </div>
   )
 }
