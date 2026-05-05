@@ -4,6 +4,7 @@ import tiposTirada from '@/data/tipos-tirada.json'
 import { SITE_URL } from '@/lib/seo-utils'
 import TiradaEspanola from '@/components/espanolas/TiradaEspanola'
 import Footer from '@/components/landing/Footer'
+import VisitaTracker from '@/components/VisitaTracker'
 
 export async function generateStaticParams() {
   return tiposTirada.flatMap((tipo) =>
@@ -93,6 +94,7 @@ export default async function Page({ params }) {
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <VisitaTracker data={{ ruta: `/tirada-de-cartas-espanolas/${tipo}/${ciudad}`, modo: 'espanola', tipo_tirada: tipo, ciudad_id: ciudad, ciudad_nombre: loc.nombre }} />
 
       <header className="text-center py-8 px-4 border-b border-amber-200/50">
         <a href="/" className="text-sm text-amber-600 hover:text-amber-800 mb-4 inline-block">

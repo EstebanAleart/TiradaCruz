@@ -3,6 +3,7 @@ import cartas from '@/data/cartas-espanolas.json'
 import { SITE_URL } from '@/lib/seo-utils'
 import TiradaEspanola from '@/components/espanolas/TiradaEspanola'
 import Footer from '@/components/landing/Footer'
+import VisitaTracker from '@/components/VisitaTracker'
 
 export async function generateStaticParams() {
   return cartas.map((c) => ({ carta: c.id }))
@@ -71,6 +72,7 @@ export default async function Page({ params }) {
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <VisitaTracker data={{ ruta: `/carta-espanola/${carta}`, modo: 'espanola', carta_id: carta }} />
 
       <header className="text-center py-8 px-4 border-b border-amber-200/50">
         <a href="/" className="text-sm text-amber-600 hover:text-amber-800 mb-4 inline-block">
