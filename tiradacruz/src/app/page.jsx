@@ -3,15 +3,13 @@ import FAQ from "@/components/landing/FAQ"
 import Footer from "@/components/landing/Footer"
 import SeoContent from "@/components/landing/SeoContent"
 import ModoApp from "@/components/ModoApp"
-import AdBanner from "@/components/AdBanner"
 
 export default function Page() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
+    <div className="min-h-screen bg-[#050509]">
       <Hero />
-      <main className="max-w-6xl mx-auto p-4 py-10">
+      <main className="max-w-lg mx-auto px-4 py-10">
         <ModoApp />
-        <AdBanner />
         <SeoContent />
         <FAQ />
       </main>

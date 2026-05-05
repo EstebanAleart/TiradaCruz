@@ -4,100 +4,78 @@ import { useState } from "react"
 import TiradaEspanola from "@/components/espanolas/TiradaEspanola"
 import TiradaTarot from "@/components/tarot/TiradaTarot"
 import HistorialPanel from "@/components/shared/HistorialPanel"
-
-const MODOS = [
-  {
-    id: "espanolas",
-    label: "Tirada en Cruz",
-    sublabel: "Baraja Española",
-    emoji: "🃏",
-    disponible: true,
-  },
-  {
-    id: "tarot",
-    label: "Tirada en Cruz",
-    sublabel: "Tarot Arcanos",
-    emoji: "🔮",
-    disponible: true,
-  },
-]
+import { ChevronRight } from "lucide-react"
 
 const SUBMODOS_TAROT = [
-  {
-    id: "mayores",
-    label: "22 Arcanos Mayores",
-    desc: "El camino del alma — los grandes arquetipos",
-  },
-  {
-    id: "completo",
-    label: "78 Cartas completas",
-    desc: "Arcanos Mayores y Menores",
-  },
+  { id: "mayores", label: "22 Arcanos Mayores", desc: "Los grandes arquetipos del alma" },
+  { id: "completo", label: "78 Cartas", desc: "Arcanos mayores y menores" },
 ]
 
 export default function ModoApp() {
   const [modo, setModo] = useState("espanolas")
-  const [submodoTarot, setSubmodoTarot] = useState(null) // null = aún no eligió
-
-  const handleSeleccionarModo = (id) => {
-    if (id === "tarot") {
-      setSubmodoTarot(null) // resetea selección de submodo al cambiar a tarot
-    }
-    setModo(id)
-  }
+  const [submodoTarot, setSubmodoTarot] = useState(null)
 
   return (
-    <>
-      {/* Selector de modo principal */}
-      <div className="flex justify-center gap-4 mb-8 flex-wrap">
-        {MODOS.map((m) => (
-          <button
-            key={m.id}
-            onClick={() => m.disponible && handleSeleccionarModo(m.id)}
-            className={`relative flex flex-col items-center gap-1 px-8 py-5 rounded-2xl border-2 font-semibold transition-all shadow-md
-              ${
-                m.disponible
-                  ? modo === m.id
-                    ? "border-amber-500 bg-amber-900/20 text-amber-900 shadow-amber-200"
-                    : "border-amber-200 bg-white/70 text-amber-800 hover:border-amber-400 hover:bg-amber-50"
-                  : "border-gray-200 bg-white/40 text-gray-400 cursor-not-allowed"
-              }`}
-            title={m.disponible ? undefined : "Próximamente"}
-          >
-            <span className="text-3xl">{m.emoji}</span>
-            <span className="text-base">{m.label}</span>
-            <span className="text-xs font-normal opacity-70">{m.sublabel}</span>
-            {modo === m.id && m.disponible && (
-              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-2 h-2 bg-amber-500 rounded-full" />
-            )}
-          </button>
-        ))}
+    <div className="w-full">
+      {/* Tab switcher */}
+      <div
+        className="flex rounded-2xl p-1 mb-6"
+        style={{ background: "#0c0c18", border: "1px solid rgba(255,255,255,0.05)" }}
+      >
+        <button
+          onClick={() => setModo("espanolas")}
+          className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all"
+          style={
+            modo === "espanolas"
+              ? { background: "#d97706", color: "#000" }
+              : { color: "#475569" }
+          }
+        >
+          🃏 Baraja Española
+        </button>
+        <button
+          onClick={() => { setModo("tarot"); setSubmodoTarot(null) }}
+          className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all"
+          style={
+            modo === "tarot"
+              ? { background: "#7c3aed", color: "#fff" }
+              : { color: "#475569" }
+          }
+        >
+          🔮 Tarot
+        </button>
       </div>
 
-      {/* Selector de submodo tarot */}
-      {modo === "tarot" && submodoTarot === null && (
-        <div className="flex flex-col items-center gap-4 mb-8">
-          <p className="text-amber-800 font-medium">¿Con qué mazo querés trabajar?</p>
-          <div className="flex gap-4 flex-wrap justify-center">
+      {/* Submodo tarot */}
+      {modo === "tarot" && !submodoTarot && (
+        <div
+          className="rounded-2xl p-5 mb-6"
+          style={{ background: "#0c0c18", border: "1px solid rgba(255,255,255,0.05)" }}
+        >
+          <p className="text-slate-500 text-sm text-center mb-4">¿Con qué mazo querés trabajar?</p>
+          <div className="flex flex-col gap-2">
             {SUBMODOS_TAROT.map((sm) => (
               <button
                 key={sm.id}
                 onClick={() => setSubmodoTarot(sm.id)}
-                className="flex flex-col items-center gap-1 px-6 py-4 rounded-xl border-2 border-purple-300 bg-white/70 text-purple-900 hover:border-purple-500 hover:bg-purple-50 transition-all shadow-sm font-semibold"
+                className="flex items-center justify-between px-4 py-4 rounded-xl transition-all text-left group hover:brightness-110"
+                style={{ border: "1px solid rgba(124,58,237,0.2)", background: "rgba(124,58,237,0.06)" }}
               >
-                <span className="text-base">{sm.label}</span>
-                <span className="text-xs font-normal text-purple-500">{sm.desc}</span>
+                <div>
+                  <p className="text-white font-semibold text-sm">{sm.label}</p>
+                  <p className="text-slate-600 text-xs mt-0.5">{sm.desc}</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-purple-600 group-hover:text-purple-400 transition-colors" />
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* Contenido */}
       {modo === "espanolas" && <TiradaEspanola />}
       {modo === "tarot" && submodoTarot && <TiradaTarot modo={submodoTarot} />}
 
       <HistorialPanel />
-    </>
+    </div>
   )
 }
