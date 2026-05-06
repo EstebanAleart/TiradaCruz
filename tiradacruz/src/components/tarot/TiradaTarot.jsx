@@ -6,6 +6,7 @@ import CruzLayoutTarot from "@/components/tarot/CruzLayoutTarot"
 import CorteTresMontones from "@/components/tarot/CorteTresMontones"
 import ChatLectura from "@/components/espanolas/ChatLectura"
 import { guardarTirada } from "@/lib/historial"
+import { trackEvento } from "@/lib/eventos"
 import { Shuffle, Sparkles, ChevronRight, RotateCcw, ArrowLeft } from "lucide-react"
 
 const MAX_MEZCLAS = 7
@@ -98,11 +99,13 @@ export default function TiradaTarot({ modo }) {
 
   const handleMezclar = () => {
     if (!puedeMezclar) return
+    if (mezclas === 0) trackEvento('mezclar_tarot')
     setMazo((prev) => mezclarArray(prev))
     setMezclas((prev) => prev + 1)
   }
 
   const handleCortar = (orden) => {
+    trackEvento('cortar_tarot')
     const mazoCortado = cortarTresMontones(mazo, orden)
     const nuevasCartas = mazoCortado.slice(0, 5).map((card) => ({ ...card, isReversed: Math.random() < 0.5 }))
     setMazo(mazoCortado)
@@ -141,6 +144,7 @@ export default function TiradaTarot({ modo }) {
   }
 
   const handleInterpretar = (preguntaOverride = null) => {
+    trackEvento('interpretar_tarot')
     const prompt = modoContin ? "Acabo de hacer una nueva tirada de tarot. Interpretá ÚNICAMENTE estas cartas." : "Realizá la interpretación completa de esta tirada de tarot en cruz."
     const display = preguntaOverride ?? (preguntaUsuario.trim() || null)
     enviarMensaje(prompt, !modoContin, display)

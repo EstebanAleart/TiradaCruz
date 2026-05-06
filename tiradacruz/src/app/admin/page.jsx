@@ -17,7 +17,7 @@ async function login(formData) {
 async function getStats() {
   const hace30dias = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
 
-  const [{ data: porDia }, { data: porRuta }, { data: porCiudad }, { data: porModo }, { data: porDispositivo }, { count: total }] =
+  const [{ data: porDia }, { data: porRuta }, { data: porCiudad }, { data: porModo }, { data: porDispositivo }, { count: total }, { data: porEvento }] =
     await Promise.all([
       supabase
         .from('visitas')
@@ -27,7 +27,8 @@ async function getStats() {
       supabase
         .from('visitas')
         .select('ruta, tipo_tirada, modo')
-        .gte('created_at', hace30dias),
+        .gte('created_at', hace30dias)
+        .neq('modo', 'evento'),
       supabase
         .from('visitas')
         .select('ciudad_nombre')
@@ -36,15 +37,23 @@ async function getStats() {
       supabase
         .from('visitas')
         .select('modo')
-        .gte('created_at', hace30dias),
+        .gte('created_at', hace30dias)
+        .neq('modo', 'evento'),
       supabase
         .from('visitas')
         .select('dispositivo')
-        .gte('created_at', hace30dias),
+        .gte('created_at', hace30dias)
+        .neq('modo', 'evento'),
       supabase
         .from('visitas')
         .select('*', { count: 'exact', head: true })
-        .gte('created_at', hace30dias),
+        .gte('created_at', hace30dias)
+        .neq('modo', 'evento'),
+      supabase
+        .from('visitas')
+        .select('ruta')
+        .gte('created_at', hace30dias)
+        .eq('modo', 'evento'),
     ])
 
   const visitasPorDia = {}
@@ -79,7 +88,14 @@ async function getStats() {
     dispositivos[v.dispositivo ?? 'desconocido'] = (dispositivos[v.dispositivo ?? 'desconocido'] ?? 0) + 1
   }
 
-  return { total: total ?? 0, visitasPorDia, topRutas, topCiudades, modos, dispositivos }
+  const conteoEventos = {}
+  for (const v of porEvento ?? []) {
+    const accion = v.ruta.replace('evento/', '')
+    conteoEventos[accion] = (conteoEventos[accion] ?? 0) + 1
+  }
+  const topEventos = Object.entries(conteoEventos).sort((a, b) => b[1] - a[1])
+
+  return { total: total ?? 0, visitasPorDia, topRutas, topCiudades, modos, dispositivos, topEventos }
 }
 
 export default async function AdminPage() {
@@ -106,7 +122,7 @@ export default async function AdminPage() {
     )
   }
 
-  const { total, visitasPorDia, topRutas, topCiudades, modos, dispositivos } = await getStats()
+  const { total, visitasPorDia, topRutas, topCiudades, modos, dispositivos, topEventos } = await getStats()
 
   const dias = Object.entries(visitasPorDia).slice(-14)
   const maxDia = Math.max(...dias.map(([, v]) => v), 1)
@@ -196,6 +212,20 @@ export default async function AdminPage() {
             ))}
           </div>
         </div>
+
+        {topEventos.length > 0 && (
+          <div className="bg-gray-900 rounded-xl p-6 mt-6">
+            <h2 className="text-sm font-semibold text-gray-400 mb-4">Clicks / Eventos</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {topEventos.map(([accion, count]) => (
+                <div key={accion} className="bg-gray-800 rounded-lg px-4 py-3">
+                  <p className="text-gray-400 text-xs mb-1">{accion.replace(/_/g, ' ')}</p>
+                  <p className="text-2xl font-bold text-green-400">{count}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

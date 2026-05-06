@@ -5,6 +5,7 @@ import { crearBaraja, mezclarArray, cortarMazo, PALOS_NOMBRES, VALOR_NOMBRES } f
 import CruzLayout from "@/components/shared/CruzLayout"
 import ChatLectura from "@/components/espanolas/ChatLectura"
 import { guardarTirada } from "@/lib/historial"
+import { trackEvento } from "@/lib/eventos"
 import { Shuffle, Scissors, Sparkles, ChevronRight, RotateCcw, ArrowLeft } from "lucide-react"
 
 const POSICIONES = ["Presente", "Futuro", "Resultado", "Pasado", "Consejo"]
@@ -128,11 +129,13 @@ export default function TiradaEspanola() {
   useEffect(() => { setMazo(crearBaraja()) }, [])
 
   const handleMezclar = () => {
+    if (mezclas === 0) trackEvento('mezclar_espanola')
     setMazo((prev) => mezclarArray(prev))
     setMezclas((prev) => prev + 1)
   }
 
   const handleCortar = () => {
+    trackEvento('cortar_espanola')
     const pos = Math.floor(Math.random() * (mazo.length - 10)) + 5
     const mazoCortado = cortarMazo(mazo, pos)
     const nuevasCartas = mazoCortado.slice(0, 5).map((card) => ({ ...card, isReversed: Math.random() < 0.5 }))
@@ -168,6 +171,7 @@ export default function TiradaEspanola() {
   }
 
   const handleInterpretar = (preguntaOverride = null) => {
+    trackEvento('interpretar_espanola')
     const prompt = modoContin ? "Acabo de hacer una nueva tirada. Interpretá ÚNICAMENTE estas cartas." : "Realizá la interpretación completa de esta tirada en cruz."
     const display = preguntaOverride ?? (preguntaUsuario.trim() || null)
     enviarMensaje(prompt, !modoContin, display)

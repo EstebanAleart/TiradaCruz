@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Sparkles, Send, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { trackEvento } from "@/lib/eventos"
 
 function WhatsAppIcon() {
   return (
@@ -69,6 +70,7 @@ export default function ChatLectura({
   }
 
   const descargarTxt = () => {
+    trackEvento('descargar_txt')
     const fecha = new Date().toLocaleString("es-AR")
 
     const lineasCartas = cartasTirada
@@ -123,6 +125,7 @@ tiradacruz.com
             <div className="flex items-center gap-3">
               <button
                 onClick={() => {
+                  trackEvento('compartir_wa')
                   const ultima = [...mensajes].reverse().find((m) => m.role === "assistant")
                   if (!ultima) return
                   const texto = `🔮 Mi tirada de cartas:\n\n${ultima.content.slice(0, 500)}${ultima.content.length > 500 ? "..." : ""}\n\nHacé la tuya en tiradadecartas.com.ar`

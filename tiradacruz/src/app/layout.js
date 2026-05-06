@@ -44,7 +44,7 @@ export const metadata = {
       "Mezclá, cortá y revelá tus cartas españolas en cruz. Interpretación con IA al instante. Gratis para toda Argentina.",
   },
   alternates: {
-    canonical: "/",
+    canonical: "https://tiradadecartas.com.ar",
   },
   verification: {
     google: "Tbg0mHr8Iwyb_QuVnG2YiUYbLjuVbD6LtXrzKK87v8g",
