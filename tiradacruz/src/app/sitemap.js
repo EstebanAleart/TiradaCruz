@@ -12,6 +12,11 @@ export default function sitemap() {
   // Home
   urls.push({ url: BASE, lastModified: now, changeFrequency: 'weekly', priority: 1.0 })
 
+  // Legal pages
+  for (const page of ['sobre-nosotros', 'politica-de-privacidad', 'terminos-y-condiciones', 'aviso-legal']) {
+    urls.push({ url: `${BASE}/${page}`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 })
+  }
+
   // /tirada-de-cartas-espanolas/[tipo]
   for (const tipo of tiposTirada) {
     urls.push({

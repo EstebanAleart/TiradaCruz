@@ -49,24 +49,49 @@ export default async function Page({ params }) {
     publisher: { '@type': 'Organization', name: 'TiradaCruz', url: SITE_URL },
   }
 
+  const faqs = [
+    {
+      q: `¿Qué significa el ${c.nombre} en la baraja española?`,
+      a: c.significado_general || c.significado_seo,
+    },
+    {
+      q: `¿Qué palo es el ${c.nombre}?`,
+      a: `El ${c.nombre} pertenece al palo de ${c.palo_nombre}. Las palabras clave de esta carta son: ${c.palabras_clave.join(', ')}.`,
+    },
+  ]
+
+  if (c.significado_amor) {
+    faqs.push({
+      q: `¿Qué dice el ${c.nombre} sobre el amor?`,
+      a: c.significado_amor,
+    })
+  }
+  if (c.significado_trabajo) {
+    faqs.push({
+      q: `¿Qué indica el ${c.nombre} en el trabajo?`,
+      a: c.significado_trabajo,
+    })
+  }
+  if (c.significado_invertida) {
+    faqs.push({
+      q: `¿Qué significa el ${c.nombre} invertido?`,
+      a: c.significado_invertida,
+    })
+  }
+
   const faqLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: [
-      {
-        '@type': 'Question',
-        name: `¿Qué significa el ${c.nombre} en la baraja española?`,
-        acceptedAnswer: { '@type': 'Answer', text: c.significado_seo },
-      },
-      {
-        '@type': 'Question',
-        name: `¿Qué palo es el ${c.nombre}?`,
-        acceptedAnswer: { '@type': 'Answer', text: `El ${c.nombre} pertenece al palo de ${c.palo_nombre}. Las palabras clave de esta carta son: ${c.palabras_clave.join(', ')}.` },
-      },
-    ],
+    mainEntity: faqs.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
   }
 
   const cartasMismoPalo = cartas.filter((x) => x.palo === c.palo && x.id !== c.id).slice(0, 4)
+
+  const sectionStyle = { border: '1px solid rgba(255,255,255,0.06)', background: '#0c0c18' }
 
   return (
     <div className="min-h-screen bg-[#050509]">
@@ -76,10 +101,10 @@ export default async function Page({ params }) {
 
       <header className="text-center py-8 px-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
         <a href="/" className="text-sm text-slate-600 hover:text-slate-400 mb-4 inline-block transition-colors">
-          ← TiradaCruz
+          &larr; TiradaCruz
         </a>
         <p className="text-sm font-medium mb-2" style={{ color: "#fbbf24" }}>
-          🃏 Baraja Española · Palo de {c.palo_nombre}
+          Baraja Española · Palo de {c.palo_nombre}
         </p>
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">{c.nombre}</h1>
         <div className="flex flex-wrap justify-center gap-2 mt-3">
@@ -96,11 +121,15 @@ export default async function Page({ params }) {
       </header>
 
       <main className="max-w-lg mx-auto px-4 pb-16">
+        {/* Significado general */}
         <section className="mt-8">
           <h2 className="text-lg font-semibold text-white mb-3">
             ¿Qué significa el {c.nombre}?
           </h2>
-          <p className="text-slate-400 text-sm leading-relaxed mb-4">{c.significado_seo}</p>
+          <p className="text-slate-400 text-sm leading-relaxed mb-2">{c.significado_seo}</p>
+          {c.significado_general && c.significado_general !== c.significado_seo && (
+            <p className="text-slate-400 text-sm leading-relaxed mb-4">{c.significado_general}</p>
+          )}
           <div className="flex flex-wrap gap-2">
             {c.palabras_clave.map((kw) => (
               <span
@@ -114,6 +143,52 @@ export default async function Page({ params }) {
           </div>
         </section>
 
+        {/* Rich content sections */}
+        <div className="mt-8 space-y-4">
+          {c.significado_amor && (
+            <section className="rounded-xl p-5" style={sectionStyle}>
+              <h2 className="text-base font-semibold text-white mb-2">{c.nombre} en el Amor</h2>
+              <p className="text-slate-400 text-sm leading-relaxed">{c.significado_amor}</p>
+            </section>
+          )}
+
+          {c.significado_trabajo && (
+            <section className="rounded-xl p-5" style={sectionStyle}>
+              <h2 className="text-base font-semibold text-white mb-2">{c.nombre} en el Trabajo</h2>
+              <p className="text-slate-400 text-sm leading-relaxed">{c.significado_trabajo}</p>
+            </section>
+          )}
+
+          {c.significado_dinero && (
+            <section className="rounded-xl p-5" style={sectionStyle}>
+              <h2 className="text-base font-semibold text-white mb-2">{c.nombre} y el Dinero</h2>
+              <p className="text-slate-400 text-sm leading-relaxed">{c.significado_dinero}</p>
+            </section>
+          )}
+
+          {c.significado_salud && (
+            <section className="rounded-xl p-5" style={sectionStyle}>
+              <h2 className="text-base font-semibold text-white mb-2">{c.nombre} y la Salud</h2>
+              <p className="text-slate-400 text-sm leading-relaxed">{c.significado_salud}</p>
+            </section>
+          )}
+
+          {c.significado_invertida && (
+            <section className="rounded-xl p-5" style={sectionStyle}>
+              <h2 className="text-base font-semibold text-white mb-2">{c.nombre} Invertida</h2>
+              <p className="text-slate-400 text-sm leading-relaxed">{c.significado_invertida}</p>
+            </section>
+          )}
+
+          {c.consejo && (
+            <section className="rounded-xl p-5" style={{ border: '1px solid rgba(217,119,6,0.15)', background: 'rgba(217,119,6,0.05)' }}>
+              <h2 className="text-base font-semibold mb-2" style={{ color: '#fbbf24' }}>Consejo</h2>
+              <p className="text-slate-300 text-sm leading-relaxed italic">{c.consejo}</p>
+            </section>
+          )}
+        </div>
+
+        {/* Tirada interactiva */}
         <section className="mt-10">
           <h2 className="text-base font-semibold text-white mb-1 text-center">
             Hacé tu tirada de cartas ahora
@@ -124,19 +199,11 @@ export default async function Page({ params }) {
           <TiradaEspanola />
         </section>
 
+        {/* FAQ */}
         <section className="mt-10">
           <h2 className="text-base font-semibold text-white mb-3">Preguntas frecuentes</h2>
           <div className="space-y-2">
-            {[
-              {
-                q: `¿Qué significa el ${c.nombre} en la baraja española?`,
-                a: c.significado_seo,
-              },
-              {
-                q: `¿El ${c.nombre} es una carta positiva?`,
-                a: `El significado del ${c.nombre} depende del contexto de la tirada. En general está asociado con: ${c.palabras_clave.join(', ')}.`,
-              },
-            ].map(({ q, a }) => (
+            {faqs.map(({ q, a }) => (
               <details
                 key={q}
                 className="rounded-xl overflow-hidden cursor-pointer"
@@ -154,6 +221,7 @@ export default async function Page({ params }) {
           </div>
         </section>
 
+        {/* Related cards */}
         {cartasMismoPalo.length > 0 && (
           <section className="mt-8">
             <h2 className="text-sm font-semibold text-slate-500 mb-3">

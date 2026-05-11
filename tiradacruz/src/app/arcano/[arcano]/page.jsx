@@ -1,9 +1,19 @@
 import { notFound } from 'next/navigation'
 import arcanos from '@/data/arcanos.json'
+import tarotData from '@/lib/tarot-data.json'
 import { SITE_URL } from '@/lib/seo-utils'
 import TiradaTarot from '@/components/tarot/TiradaTarot'
 import Footer from '@/components/landing/Footer'
 import VisitaTracker from '@/components/VisitaTracker'
+
+const tarotRichMap = Object.fromEntries(
+  tarotData.filter((c) => c.type === 'mayor').map((c) => [c.name_short, c])
+)
+
+function getRichData(arc) {
+  const key = arc.nombre_short === 'ar22' ? 'ar00' : arc.nombre_short
+  return tarotRichMap[key] || null
+}
 
 export async function generateStaticParams() {
   return arcanos.map((a) => ({ arcano: a.id }))
@@ -39,6 +49,8 @@ export default async function Page({ params }) {
   const arc = arcanos.find((a) => a.id === arcano)
   if (!arc) notFound()
 
+  const rich = getRichData(arc)
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -49,25 +61,50 @@ export default async function Page({ params }) {
     publisher: { '@type': 'Organization', name: 'TiradaCruz', url: SITE_URL },
   }
 
+  const faqs = [
+    {
+      q: `¿Qué significa ${arc.nombre} en el tarot?`,
+      a: arc.significado_seo,
+    },
+    {
+      q: `¿${arc.nombre} es un arcano positivo o negativo?`,
+      a: `En el tarot, ${arc.nombre} no es positivo ni negativo de forma absoluta. Su mensaje depende de la posición en la tirada y las cartas que la rodean. Las palabras clave son: ${arc.palabras_clave.join(', ')}.`,
+    },
+  ]
+
+  if (rich?.amor) {
+    faqs.push({
+      q: `¿Qué dice ${arc.nombre} sobre el amor?`,
+      a: rich.amor.slice(0, 200) + (rich.amor.length > 200 ? '...' : ''),
+    })
+  }
+  if (rich?.trabajo) {
+    faqs.push({
+      q: `¿Qué indica ${arc.nombre} en el trabajo?`,
+      a: rich.trabajo.slice(0, 200) + (rich.trabajo.length > 200 ? '...' : ''),
+    })
+  }
+  if (rich?.salud) {
+    faqs.push({
+      q: `¿Qué dice ${arc.nombre} sobre la salud?`,
+      a: rich.salud.slice(0, 200) + (rich.salud.length > 200 ? '...' : ''),
+    })
+  }
+
   const faqLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: [
-      {
-        '@type': 'Question',
-        name: `¿Qué significa ${arc.nombre} en el tarot?`,
-        acceptedAnswer: { '@type': 'Answer', text: arc.significado_seo },
-      },
-      {
-        '@type': 'Question',
-        name: `¿Cuáles son las palabras clave de ${arc.nombre}?`,
-        acceptedAnswer: { '@type': 'Answer', text: arc.palabras_clave.join(', ') + '.' },
-      },
-    ],
+    mainEntity: faqs.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
   }
 
   const arcanosPrev = arcanos.filter((a) => a.numero < arc.numero).slice(-2)
   const arcanosNext = arcanos.filter((a) => a.numero > arc.numero).slice(0, 2)
+
+  const sectionStyle = { border: '1px solid rgba(255,255,255,0.06)', background: '#0c0c18' }
 
   return (
     <div className="min-h-screen bg-[#050509]">
@@ -77,16 +114,17 @@ export default async function Page({ params }) {
 
       <header className="text-center py-8 px-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
         <a href="/" className="text-sm text-slate-600 hover:text-slate-400 mb-4 inline-block transition-colors">
-          ← TiradaCruz
+          &larr; TiradaCruz
         </a>
         <p className="text-sm font-medium mb-2" style={{ color: "#a78bfa" }}>
-          🔮 Arcano Mayor N° {arc.numero}
+          Arcano Mayor N° {arc.numero}
         </p>
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">{arc.nombre}</h1>
         <p className="text-slate-400 max-w-2xl mx-auto text-base">{arc.significado_corto}</p>
       </header>
 
       <main className="max-w-lg mx-auto px-4 pb-16">
+        {/* Significado general */}
         <section className="mt-8">
           <h2 className="text-lg font-semibold text-white mb-3">
             Significado de {arc.nombre}
@@ -105,6 +143,61 @@ export default async function Page({ params }) {
           </div>
         </section>
 
+        {/* Rich content from tarot-data.json */}
+        {rich && (
+          <div className="mt-8 space-y-4">
+            {rich.meaning_up && (
+              <section className="rounded-xl p-5" style={sectionStyle}>
+                <h2 className="text-base font-semibold text-white mb-2">Significado al Derecho</h2>
+                <p className="text-slate-400 text-sm leading-relaxed">{rich.meaning_up}</p>
+              </section>
+            )}
+
+            {rich.meaning_rev && (
+              <section className="rounded-xl p-5" style={sectionStyle}>
+                <h2 className="text-base font-semibold text-white mb-2">Significado Invertido</h2>
+                <p className="text-slate-400 text-sm leading-relaxed">{rich.meaning_rev}</p>
+              </section>
+            )}
+
+            {rich.amor && (
+              <section className="rounded-xl p-5" style={sectionStyle}>
+                <h2 className="text-base font-semibold text-white mb-2">{arc.nombre} en el Amor</h2>
+                <p className="text-slate-400 text-sm leading-relaxed">{rich.amor}</p>
+              </section>
+            )}
+
+            {rich.trabajo && (
+              <section className="rounded-xl p-5" style={sectionStyle}>
+                <h2 className="text-base font-semibold text-white mb-2">{arc.nombre} en el Trabajo</h2>
+                <p className="text-slate-400 text-sm leading-relaxed">{rich.trabajo}</p>
+              </section>
+            )}
+
+            {rich.finanzas && (
+              <section className="rounded-xl p-5" style={sectionStyle}>
+                <h2 className="text-base font-semibold text-white mb-2">{arc.nombre} y las Finanzas</h2>
+                <p className="text-slate-400 text-sm leading-relaxed">{rich.finanzas}</p>
+              </section>
+            )}
+
+            {rich.salud && (
+              <section className="rounded-xl p-5" style={sectionStyle}>
+                <h2 className="text-base font-semibold text-white mb-2">{arc.nombre} y la Salud</h2>
+                <p className="text-slate-400 text-sm leading-relaxed">{rich.salud}</p>
+              </section>
+            )}
+
+            {rich.espiritualidad && (
+              <section className="rounded-xl p-5" style={sectionStyle}>
+                <h2 className="text-base font-semibold text-white mb-2">{arc.nombre} y la Espiritualidad</h2>
+                <p className="text-slate-400 text-sm leading-relaxed">{rich.espiritualidad}</p>
+              </section>
+            )}
+          </div>
+        )}
+
+        {/* Tirada interactiva */}
         <section className="mt-10">
           <h2 className="text-base font-semibold text-white mb-1 text-center">
             Hacé una tirada completa de tarot
@@ -115,19 +208,11 @@ export default async function Page({ params }) {
           <TiradaTarot />
         </section>
 
+        {/* FAQ */}
         <section className="mt-10">
           <h2 className="text-base font-semibold text-white mb-3">Preguntas frecuentes</h2>
           <div className="space-y-2">
-            {[
-              {
-                q: `¿Qué significa ${arc.nombre} en el tarot?`,
-                a: arc.significado_seo,
-              },
-              {
-                q: `¿${arc.nombre} es un arcano positivo o negativo?`,
-                a: `En el tarot, ${arc.nombre} no es positivo ni negativo de forma absoluta. Su mensaje depende de la posición en la tirada y las cartas que la rodean. Las palabras clave son: ${arc.palabras_clave.join(', ')}.`,
-              },
-            ].map(({ q, a }) => (
+            {faqs.map(({ q, a }) => (
               <details
                 key={q}
                 className="rounded-xl overflow-hidden cursor-pointer group"
@@ -145,6 +230,7 @@ export default async function Page({ params }) {
           </div>
         </section>
 
+        {/* Nav prev/next */}
         {(arcanosPrev.length > 0 || arcanosNext.length > 0) && (
           <nav className="mt-8 flex justify-between items-center">
             <div className="flex gap-2 flex-wrap">
@@ -155,7 +241,7 @@ export default async function Page({ params }) {
                   className="text-xs px-3 py-1.5 rounded-full transition-colors"
                   style={{ background: "rgba(255,255,255,0.04)", color: "#94a3b8", border: "1px solid rgba(255,255,255,0.07)" }}
                 >
-                  ← {a.nombre}
+                  &larr; {a.nombre}
                 </a>
               ))}
             </div>
@@ -167,7 +253,7 @@ export default async function Page({ params }) {
                   className="text-xs px-3 py-1.5 rounded-full transition-colors"
                   style={{ background: "rgba(255,255,255,0.04)", color: "#94a3b8", border: "1px solid rgba(255,255,255,0.07)" }}
                 >
-                  {a.nombre} →
+                  {a.nombre} &rarr;
                 </a>
               ))}
             </div>
