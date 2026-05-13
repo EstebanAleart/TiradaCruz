@@ -1,6 +1,6 @@
-import Groq from "groq-sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const PROMPT_ESPANOLAS = (cartasContexto) => `Sos una lectora de cartas española con décadas de experiencia, nacida y criada en Argentina.
 Tu voz es grave, pausada y cargada de misterio. Hablás en argentino — usás "vos", "acá", "mirá" — pero con el peso de quien conoce lo que las cartas ocultan.
@@ -42,17 +42,27 @@ export async function POST(request) {
       ? PROMPT_TAROT(cartasContexto)
       : PROMPT_ESPANOLAS(cartasContexto);
 
-    const completion = await groq.chat.completions.create({
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...mensajes.map(({ role, content }) => ({ role, content })),
-      ],
-      model: "llama-3.3-70b-versatile",
-      temperature: 0.85,
-      max_tokens: 1200,
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      systemInstruction: systemPrompt,
     });
 
-    const respuesta = completion.choices[0]?.message?.content;
+    const history = mensajes.slice(0, -1).map(({ role, content }) => ({
+      role: role === "assistant" ? "model" : "user",
+      parts: [{ text: content }],
+    }));
+
+    const chat = model.startChat({
+      history,
+      generationConfig: {
+        temperature: 0.85,
+        maxOutputTokens: 1200,
+      },
+    });
+
+    const lastMessage = mensajes[mensajes.length - 1];
+    const result = await chat.sendMessage(lastMessage.content);
+    const respuesta = result.response.text();
 
     if (!respuesta) {
       return Response.json(
@@ -63,7 +73,7 @@ export async function POST(request) {
 
     return Response.json({ respuesta });
   } catch (error) {
-    console.error("Error llamando a Groq:", error);
+    console.error("Error llamando a Gemini:", error);
     return Response.json(
       { error: "Error al conectar con el servicio de IA" },
       { status: 500 }
