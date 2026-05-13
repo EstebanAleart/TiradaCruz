@@ -1,6 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const PROMPT_ESPANOLAS = (cartasContexto) => `Sos una lectora de cartas española con décadas de experiencia, nacida y criada en Argentina.
 Tu voz es grave, pausada y cargada de misterio. Hablás en argentino — usás "vos", "acá", "mirá" — pero con el peso de quien conoce lo que las cartas ocultan.
@@ -26,6 +28,44 @@ Cuando respondés preguntas de seguimiento, siempre lo hacés en el contexto de 
 ESTAS SON LAS ÚNICAS CARTAS DE ESTA TIRADA. Cada una incluye su significado según su posición (derecha o invertida). No uses ni menciones ninguna carta que no esté en esta lista. Si el historial menciona cartas de tiradas anteriores, ignoralas:
 ${cartasContexto}`;
 
+async function callGemini(systemPrompt, mensajes) {
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.0-flash",
+    systemInstruction: systemPrompt,
+  });
+
+  const history = mensajes.slice(0, -1).map(({ role, content }) => ({
+    role: role === "assistant" ? "model" : "user",
+    parts: [{ text: content }],
+  }));
+
+  const chat = model.startChat({
+    history,
+    generationConfig: {
+      temperature: 0.85,
+      maxOutputTokens: 1200,
+    },
+  });
+
+  const lastMessage = mensajes[mensajes.length - 1];
+  const result = await chat.sendMessage(lastMessage.content);
+  return result.response.text();
+}
+
+async function callGroq(systemPrompt, mensajes) {
+  const completion = await groq.chat.completions.create({
+    messages: [
+      { role: "system", content: systemPrompt },
+      ...mensajes.map(({ role, content }) => ({ role, content })),
+    ],
+    model: "llama-3.3-70b-versatile",
+    temperature: 0.85,
+    max_tokens: 1200,
+  });
+
+  return completion.choices[0]?.message?.content;
+}
+
 export async function POST(request) {
   try {
     const { mensajes, cartasContexto, tipoLectura } = await request.json();
@@ -42,27 +82,15 @@ export async function POST(request) {
       ? PROMPT_TAROT(cartasContexto)
       : PROMPT_ESPANOLAS(cartasContexto);
 
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-      systemInstruction: systemPrompt,
-    });
+    let respuesta = null;
 
-    const history = mensajes.slice(0, -1).map(({ role, content }) => ({
-      role: role === "assistant" ? "model" : "user",
-      parts: [{ text: content }],
-    }));
-
-    const chat = model.startChat({
-      history,
-      generationConfig: {
-        temperature: 0.85,
-        maxOutputTokens: 1200,
-      },
-    });
-
-    const lastMessage = mensajes[mensajes.length - 1];
-    const result = await chat.sendMessage(lastMessage.content);
-    const respuesta = result.response.text();
+    // Primero Gemini, si falla cae a Groq
+    try {
+      respuesta = await callGemini(systemPrompt, mensajes);
+    } catch (geminiError) {
+      console.error("Gemini falló, usando Groq como fallback:", geminiError.message);
+      respuesta = await callGroq(systemPrompt, mensajes);
+    }
 
     if (!respuesta) {
       return Response.json(
@@ -73,7 +101,7 @@ export async function POST(request) {
 
     return Response.json({ respuesta });
   } catch (error) {
-    console.error("Error llamando a Gemini:", error);
+    console.error("Error en interpretación:", error);
     return Response.json(
       { error: "Error al conectar con el servicio de IA" },
       { status: 500 }
